@@ -1,4 +1,4 @@
-package jar;
+package org.arida.query.voronoiknn;
 
 /**
  * Hello world!

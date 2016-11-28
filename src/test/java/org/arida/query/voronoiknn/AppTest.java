@@ -1,4 +1,4 @@
-package jar;
+package org.arida.query.voronoiknn;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
