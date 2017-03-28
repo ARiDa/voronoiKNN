@@ -56,10 +56,12 @@ public class DijkstraVD {
 
 		removed = queue.poll();
 		
+		System.out.println("Node being analyzed: " + removed.getId());
+		
 		
 		if(globalSettleNodes.contains(removed.getId())) {
-			//Verificar se ja existe esse nó no globalSettleNodes. Se sim, colocar a distancia
-			//como border distance
+			
+			//TODO Verificar se ja existe esse nó no globalSettleNodes. Se sim, colocar a distancia como border distance
 			return;
 		} else {
 			
@@ -67,10 +69,6 @@ public class DijkstraVD {
 			globalSettleNodes.add(removed.getId());
 			
 		}
-		
-		
-
-		//colocar nó aqui e verificar
 		
 		expandVertex(removed, queue, parents, wasTraversed, wasTraversedPoI);
 
@@ -84,7 +82,7 @@ public class DijkstraVD {
 
 		for (long vid : neighbors.keySet()) {
 
-			DistanceEntry newEntry = new DistanceEntry(vid, neighbors.get(vid), removed.getId());
+			DistanceEntry newEntry = new DistanceEntry(vid, removed.getDistance() + neighbors.get(vid), removed.getId());
 
 			Edge edge = null;
 			int distance = -1;
@@ -100,19 +98,21 @@ public class DijkstraVD {
 				//colocar esse nó na globalPriorityQueue
 				
 				
-				wasTraversed.put(newEntry.getId(), neighbors.get(vid));
+				wasTraversed.put(newEntry.getId(), newEntry.getDistance());
 
 				distance = neighbors.get(vid);
 				edge = getEdge(removed.getId(), vid, distance);
 
 				parents.put(vid, new RouteEntry(removed.getId(), distance, edge.getId(), edge.getLabel()));
 				
-				globalPriorityQueue.add(new DistanceEntry(source.getId(), distance, -1l));
+				//TODO Create a similar class, just like the DistanceEntry.
+				//Esse é uma entrada especial. Está apenas mapeando a atual distancia para o PoI correpondente
+				globalPriorityQueue.add(new DistanceEntry(source.getId(), newEntry.getDistance(), vid));
 
 			} else {
 
 				int cost = wasTraversed.get(vid);
-				distance = neighbors.get(vid);
+				distance = newEntry.getDistance();
 
 				if (cost != wasRemoved) {
 					if (cost > distance) {
@@ -124,12 +124,21 @@ public class DijkstraVD {
 						//TODO
 //						globalPriorityQueue.add(new DistanceEntry(source.getId(), distance, -1l));
 						
-						wasTraversed.put(newEntry.getId(), distance);
+						wasTraversed.put(newEntry.getId(), newEntry.getDistance());
 
+						//TODO Double check if this is working
+						newEntry.setId(source.getId());
+						newEntry.setParent(vid);
+						newEntry.setDistance(distance);
+						globalPriorityQueue.remove(newEntry);
+						globalPriorityQueue.add(new DistanceEntry(source.getId(), distance, vid));
+						
 						parents.remove(vid);
 						distance = neighbors.get(vid);
 						edge = getEdge(removed.getId(), vid, distance);
 						parents.put(vid, new RouteEntry(removed.getId(), distance, edge.getId(), edge.getLabel()));
+						
+						
 
 					}
 				}

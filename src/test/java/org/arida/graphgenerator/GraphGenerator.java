@@ -231,6 +231,75 @@ public class GraphGenerator {
 		
 		edge = new EdgeImpl(21l, 13l, 14l, 7);
 		graph.addEdge(edge);
+		
+		
+		
+		
+		edge = new EdgeImpl(22l, 3l, 0l, 10);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(23l, 7l, 0l, 9);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(24l, 4l, 1l, 6);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(25l, 10l, 1l, 9);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(26l, 12l, 2l, 4);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(27l, 14l, 2l, 15);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(28l, 15l, 2l, 6);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(29l, 4l, 3l, 11);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(30l, 5l, 3l, 6);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(31l, 6l, 4l, 5);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(32l, 6l, 5l, 7);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(33l, 8l, 5l, 6);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(34l, 9l, 6l, 5);
+		graph.addEdge(edge);
+
+		edge = new EdgeImpl(35l, 8l, 7l, 10);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(36l, 13l, 7l, 9);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(37l, 11l, 8l, 6);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(38l, 10l, 9l, 6);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(39l, 12l, 9l, 4);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(40l, 15l, 10l, 9);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(41l, 12l, 11l, 7);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(42l, 14l, 11l, 10);
+		graph.addEdge(edge);
+		
+		edge = new EdgeImpl(43l, 14l, 13l, 7);
+		graph.addEdge(edge);
 
 		graph.save();
 		return graph;

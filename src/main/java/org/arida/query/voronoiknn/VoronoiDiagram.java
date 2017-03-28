@@ -15,16 +15,45 @@ public class VoronoiDiagram {
 
 	private Graph g;
 	private Map<Long, Node> PoIs = new HashMap<Long, Node>();
+	
+	/**
+	 * Map that will store an instance of a modified Dijkstra Algorithm
+	 * to each Point of Interest (PoI).
+	 */
 	private Map<Long, DijkstraVD> DijkstraHash = new HashMap<Long, DijkstraVD>();
 	
-	private HashMap<Long, HashMap<Long, Integer>> border2BorderDistance;
-	private HashMap<Long, HashMap<Long, Integer>> border2PoIDistance;
+	/**
+	 * border2BorderDistance will store the distance between all pairs of border points
+	 * in the same cell. A HashMap that maps the first border point (NodeID-Long) to a HashMap
+	 * that maps the second border point (NodeID-Long) to the distance (distance - Integer) 
+	 * between them.
+	 */
+	private Map<Long, HashMap<Long, Integer>> border2BorderDistance;
 	
-	private HashMap<Long, Set<Long>> polygonBorderPoints;
+	/**
+	 * border2PoIDistance will store the distance between all border points and their respective
+	 * Point of Interest (PoI). A HashMap that maps the border point (NodeID-Long) to a HashMap
+	 * that maps the Point of Interest (NodeID-Long) to the distance (distance - Integer) 
+	 * between them. 
+	 */
+	private Map<Long, HashMap<Long, Integer>> border2PoIDistance;
 	
-	private HashMap<Long, Set<Long>> adjacentPolygons;
+	/**
+	 * polygonBorderPoints will store all borderPoints that belongs to a certain Voronoi Cell (polygon).
+	 * A HashMap that maps the Point of Interest (NodeID-Long) of the cell to a set of all 
+	 * border points (Set of NodeID's)
+	 */
+	private Map<Long, Set<Long>> polygonBorderPoints;
 	
-	private HashMap<Long, Long> voronoiCell;
+	/**
+	 * adjacentPolygons will store all adjacent polygons of a certain Voronoi Cell (polygon).
+	 * A HashMap that maps the Point of Interest (NodeID-Long) of the cell to a set of all 
+	 * adjacent polygons Points of Interest (Set of NodeID's)
+	 */
+	private Map<Long, Set<Long>> adjacentPolygons;
+	
+	//TODO Verificar para que serve essa variável
+	private Map<Long, Long> voronoiCell;
 	
 	public Set<Long> globalSettleNodes = new HashSet<Long>();
 	
@@ -47,8 +76,10 @@ public class VoronoiDiagram {
 		
 	}
 	
-	/*
-	 * Run Parallel Dijkstra starting from each PoI
+	/**
+	 * This method will run a slightly modified Dijkstra algorithm for each Point of Interest.
+	 * There's a simple scheduler in this method: the next PoI that will have it's respective
+	 * Dijkstra Algorithm runned is the one with the smaller unsettleNode distance.
 	 */
 	public void createDiagram() {
 		
@@ -66,6 +97,7 @@ public class VoronoiDiagram {
 			
 			long currentPoIID = PoIs.get(globalPriorityQueue.poll().getId()).getId();
 			
+			System.out.println("PoI being iterated: " + currentPoIID);
 			//Passar a variável globalSettleNodes aqui?
 			DijkstraHash.get(currentPoIID).iterate();
 			
