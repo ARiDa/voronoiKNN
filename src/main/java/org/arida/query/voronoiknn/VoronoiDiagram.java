@@ -47,7 +47,7 @@ public class VoronoiDiagram {
 	 * A HashMap that maps the Point of Interest (NodeID-Long) of the cell to a set of all 
 	 * border points (Set of NodeID's)
 	 */
-	private Map<Long, Set<Long>> polygonBorderPoints;
+	private Map<Long, HashSet<Long>> polygonBorderPoints = new HashMap<>();
 	
 	/**
 	 * adjacentPolygons will store all adjacent polygons of a certain Voronoi Cell (polygon).
@@ -90,21 +90,24 @@ public class VoronoiDiagram {
 		//Initialize a Hash with an instance of Dijkstra Algorithm
 		//for each Point of Interest
 		for(Node poi : g.getPOIsNodes()) {
-			DijkstraVD dj = new DijkstraVD(g, poi, globalSettleNodes, globalUnsettleNodes);
+			DijkstraVD dj = new DijkstraVD(g, poi, globalSettleNodes, globalUnsettleNodes, polygonBorderPoints);
 			dijkstraHash.put(poi.getId(), dj);
+			polygonBorderPoints.put(poi.getId(), new HashSet<Long>());
 			
 		}
 		
 		//Corresponds to one iteration of vertex expansion, picking
 		//always the PoI with lowest node in the unsettle queue
-		while(globalSettleNodes.size() != g.getNumberOfNodes()) {
+		while(!globalUnsettleNodes.isEmpty()) {
 			
-			long currentPoIID = pois.get(globalUnsettleNodes.poll().getId()).getId();
+			Long currentPoIID = pois.get(globalUnsettleNodes.poll().getId()).getId();
 			
 			logger.debug("PoI being iterated: {}", currentPoIID);
 			dijkstraHash.get(currentPoIID).iterate();
 
 		}
+		
+		System.out.println("Test");
 	
 	}
 	

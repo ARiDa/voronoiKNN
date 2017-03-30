@@ -4,6 +4,7 @@ import static org.graphast.util.NumberUtils.convertToInt;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -11,7 +12,6 @@ import java.util.Set;
 import org.graphast.model.Edge;
 import org.graphast.model.Graph;
 import org.graphast.model.Node;
-import org.graphast.model.contraction.CHEdge;
 import org.graphast.query.route.shortestpath.model.DistanceEntry;
 import org.graphast.query.route.shortestpath.model.RouteEntry;
 import org.slf4j.Logger;
@@ -23,8 +23,9 @@ public class DijkstraVD {
 
 	//External references
 	private Graph graph;
-	private Set<Long> globalSettleNodes = new HashSet<Long>();
-	private Queue<DistanceEntry> globalUnsettleNodes = new PriorityQueue<DistanceEntry>();
+	private Set<Long> globalSettleNodes = new HashSet<>();
+	private Queue<DistanceEntry> globalUnsettleNodes = new PriorityQueue<>();
+	private Map<Long, HashSet<Long>> polygonBorderPoints = new HashMap<>();
 	private Node source;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -32,18 +33,19 @@ public class DijkstraVD {
 	private int wasRemoved = -1;
 
 	//Internal attributes
-	private Queue<DistanceEntry> queue = new PriorityQueue<DistanceEntry>();
-	private HashMap<Long, Integer> wasTraversed = new HashMap<Long, Integer>();
-	private HashMap<Long, Integer> wasTraversedPoI = new HashMap<Long, Integer>();
-	private HashMap<Long, RouteEntry> parents = new HashMap<Long, RouteEntry>();
+	private Queue<DistanceEntry> queue = new PriorityQueue<>();
+	private Map<Long, Integer> wasTraversed = new HashMap<>();
+	private Map<Long, Integer> wasTraversedPoI = new HashMap<>();
+	private Map<Long, RouteEntry> parents = new HashMap<>();
 	private DistanceEntry removed = null;
 
-	public DijkstraVD(Graph graph, Node source, Set<Long> globalSettleNodes, Queue<DistanceEntry> globalUnsettleNodes) {
+	public DijkstraVD(Graph graph, Node source, Set<Long> globalSettleNodes, Queue<DistanceEntry> globalUnsettleNodes, Map<Long, HashSet<Long>> polygonBorderPoints) {
 		
 		this.graph = graph;
 		this.source = source;
 		this.globalSettleNodes = globalSettleNodes;
 		this.globalUnsettleNodes = globalUnsettleNodes;
+		this.polygonBorderPoints = polygonBorderPoints;
 		
 		init(source, queue);
 
@@ -61,11 +63,14 @@ public class DijkstraVD {
 		removed = queue.poll();
 		logger.debug("Node being analyzed: {}", removed.getId());
 		
-		
 		if(globalSettleNodes.contains(removed.getId())) {
+
+			HashSet<Long> newSet = polygonBorderPoints.get(source.getId());
+			newSet.add(removed.getParent());
+			polygonBorderPoints.replace(source.getId(), newSet);
 			
-			//TODO Verificar se ja existe esse nó no globalSettleNodes. Se sim, colocar a distancia como border distance
 			return;
+			
 		} else {
 			
 			wasTraversed.put(removed.getId(), wasRemoved);
@@ -78,8 +83,8 @@ public class DijkstraVD {
 	}
 	
 	public void expandVertex(DistanceEntry removed, Queue<DistanceEntry> queue,
-			HashMap<Long, RouteEntry> parents, HashMap<Long, Integer> wasTraversed,
-			HashMap<Long, Integer> wasTraversedPoI) {
+			Map<Long, RouteEntry> parents, Map<Long, Integer> wasTraversed,
+			Map<Long, Integer> wasTraversedPoI) {
 
 		Long2IntMap neighbors = graph.accessNeighborhood(graph.getNode(removed.getId()));
 
@@ -121,6 +126,7 @@ public class DijkstraVD {
 					if (cost > distance) {
 						queue.remove(newEntry);
 						queue.offer(newEntry);
+						
 						wasTraversed.remove(newEntry.getId());
 						
 						//colocar esse nó na globalPriorityQueue

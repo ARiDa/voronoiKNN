@@ -12,7 +12,7 @@ public class VoronoiDiagramTest {
 	@Before
 	public void setup() {
 		
-		graph = new GraphGenerator().generateExamplePoI2();
+		graph = new GraphGenerator().generateExamplePoIPaper();
 		
 	}
 
