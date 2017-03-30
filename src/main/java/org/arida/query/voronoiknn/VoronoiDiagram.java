@@ -26,6 +26,10 @@ public class VoronoiDiagram {
 	 */
 	private Map<Long, DijkstraVD> dijkstraHash = new HashMap<>();
 
+	/**
+	 * nodeToPoIMap will simulate each Network Voronoi Polygon by mapping every
+	 * node to its respective PoI associated.
+	 */
 	private Map<Long, Long> nodeToPoIMap = new HashMap<>();
 
 	/**
