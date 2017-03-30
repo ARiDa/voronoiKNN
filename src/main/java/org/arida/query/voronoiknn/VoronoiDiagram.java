@@ -10,17 +10,21 @@ import java.util.Set;
 import org.graphast.model.Graph;
 import org.graphast.model.Node;
 import org.graphast.query.route.shortestpath.model.DistanceEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VoronoiDiagram {
 
 	private Graph g;
-	private Map<Long, Node> PoIs = new HashMap<Long, Node>();
+	private Map<Long, Node> pois = new HashMap<Long, Node>();
+	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	/**
 	 * Map that will store an instance of a modified Dijkstra Algorithm
 	 * to each Point of Interest (PoI).
 	 */
-	private Map<Long, DijkstraVD> DijkstraHash = new HashMap<Long, DijkstraVD>();
+	private Map<Long, DijkstraVD> dijkstraHash = new HashMap<Long, DijkstraVD>();
 	
 	/**
 	 * border2BorderDistance will store the distance between all pairs of border points
@@ -55,11 +59,11 @@ public class VoronoiDiagram {
 	//TODO Verificar para que serve essa variável
 	private Map<Long, Long> voronoiCell;
 	
-	public Set<Long> globalSettleNodes = new HashSet<Long>();
+	private Set<Long> globalSettleNodes = new HashSet<Long>();
 	
 	//TODO criar um SET com nós que já são settle
 	
-	private Queue<DistanceEntry> globalPriorityQueue = new PriorityQueue<DistanceEntry>();
+	private Queue<DistanceEntry> globalUnsettleNodes = new PriorityQueue<>();
 	
 	public VoronoiDiagram(Graph g) {
 		
@@ -67,9 +71,9 @@ public class VoronoiDiagram {
 		
 		for(Node poi : g.getPOIsNodes()) {
 			DistanceEntry distancePoI = new DistanceEntry(poi.getId(), 0, -1);
-			globalPriorityQueue.add(distancePoI);
+			globalUnsettleNodes.add(distancePoI);
 			
-			PoIs.put(poi.getId(), poi);
+			pois.put(poi.getId(), poi);
 			
 //			globalSettleNodes.add(poi.getId());
 		}
@@ -86,8 +90,8 @@ public class VoronoiDiagram {
 		//Initialize a Hash with an instance of Dijkstra Algorithm
 		//for each Point of Interest
 		for(Node poi : g.getPOIsNodes()) {
-			DijkstraVD dj = new DijkstraVD(g, poi, globalSettleNodes, globalPriorityQueue);
-			DijkstraHash.put(poi.getId(), dj);
+			DijkstraVD dj = new DijkstraVD(g, poi, globalSettleNodes, globalUnsettleNodes);
+			dijkstraHash.put(poi.getId(), dj);
 			
 		}
 		
@@ -95,14 +99,11 @@ public class VoronoiDiagram {
 		//always the PoI with lowest node in the unsettle queue
 		while(globalSettleNodes.size() != g.getNumberOfNodes()) {
 			
-			long currentPoIID = PoIs.get(globalPriorityQueue.poll().getId()).getId();
+			long currentPoIID = pois.get(globalUnsettleNodes.poll().getId()).getId();
 			
-			System.out.println("PoI being iterated: " + currentPoIID);
-			//Passar a variável globalSettleNodes aqui?
-			DijkstraHash.get(currentPoIID).iterate();
-			
-			
-			
+			logger.debug("PoI being iterated: {}", currentPoIID);
+			dijkstraHash.get(currentPoIID).iterate();
+
 		}
 	
 	}

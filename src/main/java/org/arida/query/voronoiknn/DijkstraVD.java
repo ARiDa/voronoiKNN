@@ -14,6 +14,8 @@ import org.graphast.model.Node;
 import org.graphast.model.contraction.CHEdge;
 import org.graphast.query.route.shortestpath.model.DistanceEntry;
 import org.graphast.query.route.shortestpath.model.RouteEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 
@@ -22,8 +24,10 @@ public class DijkstraVD {
 	//External references
 	private Graph graph;
 	private Set<Long> globalSettleNodes = new HashSet<Long>();
-	private Queue<DistanceEntry> globalPriorityQueue = new PriorityQueue<DistanceEntry>();
+	private Queue<DistanceEntry> globalUnsettleNodes = new PriorityQueue<DistanceEntry>();
 	private Node source;
+	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private int wasRemoved = -1;
 
@@ -34,12 +38,12 @@ public class DijkstraVD {
 	private HashMap<Long, RouteEntry> parents = new HashMap<Long, RouteEntry>();
 	private DistanceEntry removed = null;
 
-	public DijkstraVD(Graph graph, Node source, Set<Long> globalSettleNodes, Queue<DistanceEntry> globalPriorityQueue) {
+	public DijkstraVD(Graph graph, Node source, Set<Long> globalSettleNodes, Queue<DistanceEntry> globalUnsettleNodes) {
 		
 		this.graph = graph;
 		this.source = source;
 		this.globalSettleNodes = globalSettleNodes;
-		this.globalPriorityQueue = globalPriorityQueue;
+		this.globalUnsettleNodes = globalUnsettleNodes;
 		
 		init(source, queue);
 
@@ -55,8 +59,7 @@ public class DijkstraVD {
 	public void iterate() {
 
 		removed = queue.poll();
-		
-		System.out.println("Node being analyzed: " + removed.getId());
+		logger.debug("Node being analyzed: {}", removed.getId());
 		
 		
 		if(globalSettleNodes.contains(removed.getId())) {
@@ -107,7 +110,7 @@ public class DijkstraVD {
 				
 				//TODO Create a similar class, just like the DistanceEntry.
 				//Esse é uma entrada especial. Está apenas mapeando a atual distancia para o PoI correpondente
-				globalPriorityQueue.add(new DistanceEntry(source.getId(), newEntry.getDistance(), vid));
+				globalUnsettleNodes.add(new DistanceEntry(source.getId(), newEntry.getDistance(), vid));
 
 			} else {
 
@@ -130,8 +133,8 @@ public class DijkstraVD {
 						newEntry.setId(source.getId());
 						newEntry.setParent(vid);
 						newEntry.setDistance(distance);
-						globalPriorityQueue.remove(newEntry);
-						globalPriorityQueue.add(new DistanceEntry(source.getId(), distance, vid));
+						globalUnsettleNodes.remove(newEntry);
+						globalUnsettleNodes.add(new DistanceEntry(source.getId(), distance, vid));
 						
 						parents.remove(vid);
 						distance = neighbors.get(vid);
