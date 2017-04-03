@@ -27,6 +27,7 @@ public class DijkstraVD {
 	private Queue<DistanceEntry> globalUnsettleNodes = new PriorityQueue<>();
 	private Map<Long, HashSet<Long>> polygonBorderPoints = new HashMap<>();
 	private Map<Long, Long> nodeToPoIMap = new HashMap<>();
+	private Map<Long, Set<Long>> poiToNodesMap = new HashMap<>();
 	private Map<Long, Set<Long>> adjacentPolygons = new HashMap<>();
 	private Node source;
 
@@ -42,7 +43,7 @@ public class DijkstraVD {
 	private DistanceEntry removed = null;
 
 	public DijkstraVD(Graph graph, Node source, Set<Long> globalSettleNodes, Queue<DistanceEntry> globalUnsettleNodes,
-			Map<Long, HashSet<Long>> polygonBorderPoints, Map<Long, Long> nodeToPoIMap, Map<Long, Set<Long>> adjacentPolygons) {
+			Map<Long, HashSet<Long>> polygonBorderPoints, Map<Long, Long> nodeToPoIMap, Map<Long, Set<Long>> poiToNodesMap, Map<Long, Set<Long>> adjacentPolygons) {
 
 		this.graph = graph;
 		this.source = source;
@@ -51,6 +52,7 @@ public class DijkstraVD {
 		this.polygonBorderPoints = polygonBorderPoints;
 		this.nodeToPoIMap = nodeToPoIMap;
 		this.adjacentPolygons = adjacentPolygons;
+		this.poiToNodesMap = poiToNodesMap;
 
 		init(source, queue);
 
@@ -85,6 +87,11 @@ public class DijkstraVD {
 			wasTraversed.put(removed.getId(), wasRemoved);
 			globalSettleNodes.add(removed.getId());
 			nodeToPoIMap.put(removed.getId(), source.getId());
+			
+			Set<Long> newNodeSet = poiToNodesMap.get(source.getId());
+			newNodeSet.add(removed.getId());
+			poiToNodesMap.replace(source.getId(), newNodeSet);
+			
 
 		}
 
