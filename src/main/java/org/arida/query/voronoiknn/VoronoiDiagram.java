@@ -127,8 +127,11 @@ public class VoronoiDiagram {
 
 		calculateBorderDistances();
 		
-		System.out.println("Fin.");
-
+	}
+	
+	//TODO This method should be changed to use R-tree
+	public long contain(long node) {
+		return nodeToPoIMap.get(node);
 	}
 
 	private void calculateBorderDistances() {
@@ -181,4 +184,12 @@ public class VoronoiDiagram {
 		return dj.shortestPath(node, borderPoint).getTotalDistance();
 	}
 
+	public Map<Long, Set<Long>> getAdjacentPolygons() {
+		return adjacentPolygons;
+	}
+
+	public Map<Long, Long> getNodeToPoIMap() {
+		return nodeToPoIMap;
+	}
+	
 }
