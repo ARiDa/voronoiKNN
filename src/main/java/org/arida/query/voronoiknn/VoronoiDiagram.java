@@ -198,4 +198,28 @@ public class VoronoiDiagram {
 		return nodeToPoIMap;
 	}
 
+	public Map<Long, Set<Long>> getPoiToNodesMap() {
+		return poiToNodesMap;
+	}
+
+	public Map<Long, Map<Long, Long>> getBorder2BorderDistance() {
+		return border2BorderDistance;
+	}
+
+	public Map<Long, Map<Long, Long>> getPoi2BorderDistance() {
+		return poi2BorderDistance;
+	}
+
+	public Map<Long, Map<Long, Long>> getNode2BorderDistance() {
+		return node2BorderDistance;
+	}
+
+	public Map<Long, HashSet<Long>> getPolygonBorderPoints() {
+		return polygonBorderPoints;
+	}
+
+	public Map<Long, DistanceEntry> getBorderNeighbor() {
+		return borderNeighbor;
+	}
+	
 }
