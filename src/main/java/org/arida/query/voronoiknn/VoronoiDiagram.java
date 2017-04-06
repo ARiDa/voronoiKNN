@@ -78,6 +78,12 @@ public class VoronoiDiagram {
 	 */
 	private Map<Long, Set<Long>> adjacentPolygons = new HashMap<>();
 
+	/**
+	 * borderNeighbor will store the relation between two border points from
+	 * adjacent polygons.
+	 */
+	private Map<Long, DistanceEntry> borderNeighbor = new HashMap<>();
+
 	private Set<Long> globalSettleNodes = new HashSet<>();
 	private Queue<DistanceEntry> globalUnsettleNodes = new PriorityQueue<>();
 
@@ -106,7 +112,7 @@ public class VoronoiDiagram {
 		// for each Point of Interest
 		for (Node poi : g.getPOIsNodes()) {
 			DijkstraVD dj = new DijkstraVD(g, poi, globalSettleNodes, globalUnsettleNodes, polygonBorderPoints,
-					nodeToPoIMap, poiToNodesMap, adjacentPolygons);
+					nodeToPoIMap, poiToNodesMap, adjacentPolygons, borderNeighbor);
 			dijkstraHash.put(poi.getId(), dj);
 			polygonBorderPoints.put(poi.getId(), new HashSet<Long>());
 			poiToNodesMap.put(poi.getId(), new HashSet<Long>());
@@ -126,11 +132,11 @@ public class VoronoiDiagram {
 		}
 
 		calculateBorderDistances();
-		
+
 	}
-	
-	//TODO This method should be changed to use R-tree
-	public long contain(long node) {
+
+	// TODO This method should be changed to use R-tree
+	public long contains(long node) {
 		return nodeToPoIMap.get(node);
 	}
 
@@ -191,5 +197,5 @@ public class VoronoiDiagram {
 	public Map<Long, Long> getNodeToPoIMap() {
 		return nodeToPoIMap;
 	}
-	
+
 }

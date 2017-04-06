@@ -29,6 +29,7 @@ public class DijkstraVD {
 	private Map<Long, Long> nodeToPoIMap = new HashMap<>();
 	private Map<Long, Set<Long>> poiToNodesMap = new HashMap<>();
 	private Map<Long, Set<Long>> adjacentPolygons = new HashMap<>();
+	private Map<Long, DistanceEntry> borderNeighbor = new HashMap<>();
 	private Node source;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -44,7 +45,7 @@ public class DijkstraVD {
 
 	public DijkstraVD(Graph graph, Node source, Set<Long> globalSettleNodes, Queue<DistanceEntry> globalUnsettleNodes,
 			Map<Long, HashSet<Long>> polygonBorderPoints, Map<Long, Long> nodeToPoIMap,
-			Map<Long, Set<Long>> poiToNodesMap, Map<Long, Set<Long>> adjacentPolygons) {
+			Map<Long, Set<Long>> poiToNodesMap, Map<Long, Set<Long>> adjacentPolygons, Map<Long, DistanceEntry> borderNeighbor) {
 
 		this.graph = graph;
 		this.source = source;
@@ -54,6 +55,7 @@ public class DijkstraVD {
 		this.nodeToPoIMap = nodeToPoIMap;
 		this.adjacentPolygons = adjacentPolygons;
 		this.poiToNodesMap = poiToNodesMap;
+		this.borderNeighbor = borderNeighbor;
 
 		init(source, queue);
 
@@ -80,6 +82,9 @@ public class DijkstraVD {
 			HashSet<Long> newBorderSet = polygonBorderPoints.get(source.getId());
 			newBorderSet.add(removed.getParent());
 			polygonBorderPoints.replace(source.getId(), newBorderSet);
+			
+			DistanceEntry borderEdgeDistanceEntry = new DistanceEntry(removed.getId(), graph.getEdge(removed.getParent(), removed.getId()).getDistance(), removed.getParent());
+			borderNeighbor.put(removed.getParent(), borderEdgeDistanceEntry);
 
 			return;
 
