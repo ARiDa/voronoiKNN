@@ -83,7 +83,7 @@ public class DijkstraVD {
 			newBorderSet.add(removed.getParent());
 			polygonBorderPoints.replace(source.getId(), newBorderSet);
 			
-			DistanceEntry borderEdgeDistanceEntry = new DistanceEntry(removed.getId(), graph.getEdge(removed.getParent(), removed.getId()).getDistance(), nodeToPoIMap.get(removed));
+			DistanceEntry borderEdgeDistanceEntry = new DistanceEntry(removed.getId(), graph.getEdge(removed.getParent(), removed.getId()).getDistance(), nodeToPoIMap.get(removed.getId()));
 			borderNeighbor.put(removed.getParent(), borderEdgeDistanceEntry);
 
 			return;

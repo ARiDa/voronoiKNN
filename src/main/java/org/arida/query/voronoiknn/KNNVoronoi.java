@@ -1,10 +1,10 @@
 package org.arida.query.voronoiknn;
 
-import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
+import org.graphast.config.Configuration;
 import org.graphast.model.Edge;
 import org.graphast.model.EdgeImpl;
 import org.graphast.model.Graph;
@@ -22,7 +22,7 @@ public class KNNVoronoi {
 	private Graph graph;
 	private VoronoiDiagram voronoiDiagram;
 
-	Graph borderPointsGraph = new GraphImpl();
+	Graph borderPointsGraph = new GraphImpl(Configuration.USER_HOME + "/graphast/test/borderPointsGraph");
 	Queue<DistanceEntry> finalNearestNeighbors = new PriorityQueue<>();
 	Queue<DistanceEntry> candidatePoIs = new PriorityQueue<>();
 
@@ -93,27 +93,6 @@ public class KNNVoronoi {
 	}
 
 	/**
-	 * THis method will update the list of known candidates of nearest nodes
-	 * based on the adjacent polygons of a Voronoi Diagram.
-	 * 
-	 * @param foundNeighbors
-	 *            list that will be updated
-	 * @return the updated list
-	 */
-	private Set<Long> generateCandidateSet(Set<Long> foundNeighbors) {
-
-		Set<Long> newListOfKnownCandidates = new HashSet<>();
-
-		for (Long knownCandidate : foundNeighbors) {
-			newListOfKnownCandidates.add(knownCandidate);
-			newListOfKnownCandidates.addAll(voronoiDiagram.getAdjacentPolygons().get(knownCandidate));
-		}
-
-		return newListOfKnownCandidates;
-
-	}
-
-	/**
 	 * This method will receive a set of border points and will add them to an
 	 * auxiliary graph that contains only the border points of the nearest
 	 * neighbors for that iteration.
@@ -128,10 +107,10 @@ public class KNNVoronoi {
 			Node fromNode;
 			Long fromNodeId = borderPointsGraph.getNodeId(graph.getNode(borderPointFrom).getLatitude(),
 					graph.getNode(borderPointFrom).getLongitude());
-
+			
 			// Checking if the node already exists
 			if (fromNodeId == null) {
-				fromNode = new NodeImpl(graph.getNode(borderPointFrom).getLatitude(),
+				fromNode = new NodeImpl(borderPointFrom, graph.getNode(borderPointFrom).getLatitude(),
 						graph.getNode(borderPointFrom).getLongitude());
 				borderPointsGraph.addNode(fromNode);
 			} else {
@@ -146,11 +125,11 @@ public class KNNVoronoi {
 
 				// Checking if the node already exists
 				if (toNodeId == null) {
-					toNode = new NodeImpl(graph.getNode(borderPointTo).getLatitude(),
+					toNode = new NodeImpl(borderPointTo, graph.getNode(borderPointTo).getLatitude(),
 							graph.getNode(borderPointTo).getLongitude());
 					borderPointsGraph.addNode(toNode);
 				} else {
-					toNode = borderPointsGraph.getNode(fromNodeId);
+					toNode = borderPointsGraph.getNode(toNodeId);
 				}
 
 				Edge newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(),
