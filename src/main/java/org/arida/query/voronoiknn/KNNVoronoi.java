@@ -11,6 +11,8 @@ import org.graphast.model.Graph;
 import org.graphast.model.GraphImpl;
 import org.graphast.model.Node;
 import org.graphast.model.NodeImpl;
+import org.graphast.query.route.shortestpath.dijkstra.Dijkstra;
+import org.graphast.query.route.shortestpath.dijkstra.DijkstraConstantWeight;
 import org.graphast.query.route.shortestpath.model.DistanceEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,9 @@ public class KNNVoronoi {
 	public Queue<DistanceEntry> executeKNN(long queryPoint, int k) {
 
 		Queue<DistanceEntry> finalResult = new PriorityQueue<>();
+		
+		Set<Long> visitedNeighborsCandidates;
+		Set<Long> nextNeighborCandidates;
 
 		if (k == 0)
 			return finalResult;
@@ -57,19 +62,30 @@ public class KNNVoronoi {
 		// point.
 		Set<Long> newNodes = voronoiDiagram.getPolygonBorderPoints().get(firstNearestNeighbor);
 		newNodes.add(queryPoint);
-
+		
 		updateGraphWithNewBorderPoints(newNodes);
-
-		Set<Long> nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(firstNearestNeighbor);
-
+		
+		nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(firstNearestNeighbor);
+		visitedNeighborsCandidates = voronoiDiagram.getAdjacentPolygons().get(firstNearestNeighbor);
+		
+		
+		Queue<DistanceEntry> nearestNeighbors = new PriorityQueue<>();
+		
 		for (int i = 2; i <= k; i++) {
 
 			for(Long nearestNeighborCandidatePoI : nextNeighborCandidates) {
 				newNodes = voronoiDiagram.getPolygonBorderPoints().get(nearestNeighborCandidatePoI);
 				updateGraphWithNewBorderPoints(newNodes);
+				Dijkstra dj = new DijkstraConstantWeight(borderPointsGraph);
+				long distance = dj.shortestPath(queryPoint, nearestNeighborCandidatePoI).getTotalDistance();
 				
+				nearestNeighbors.add(new DistanceEntry(nearestNeighborCandidatePoI, (int) distance, -1));
 			}
-			//Adicionar ao final o novo PoI
+			
+			nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(nearestNeighbors.poll().getId());
+			nextNeighborCandidates.removeAll(visitedNeighborsCandidates);
+			visitedNeighborsCandidates.addAll(nextNeighborCandidates);
+			
 		}
 
 		return finalResult;
