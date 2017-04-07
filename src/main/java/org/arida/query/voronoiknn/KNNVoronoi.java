@@ -19,7 +19,7 @@ public class KNNVoronoi {
 
 	private Graph graph;
 	private VoronoiDiagram voronoiDiagram;
-	
+
 	Graph borderPointsGraph = new GraphImpl();
 	Queue<DistanceEntry> finalNearestNeighbors = new PriorityQueue<>();
 	Queue<DistanceEntry> candidatePoIs = new PriorityQueue<>();
@@ -42,31 +42,38 @@ public class KNNVoronoi {
 	public Queue<DistanceEntry> executeKNN(long queryPoint, int k) {
 
 		Queue<DistanceEntry> finalResult = new PriorityQueue<>();
-		
-		if(k == 0)
+
+		if (k == 0)
 			return finalResult;
-		
-		if(k == 1) {
+
+		if (k == 1) {
 			finalResult.add(new DistanceEntry(voronoiDiagram.getNodeToPoIMap().get(queryPoint), 0, -1));
 			return finalResult;
 		}
-		
-		
+
 		Long firstNearestNeighbor = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
-		
+
+		// The first iteration will consider all the borderPoints AND the query
+		// point.
 		Set<Long> newNodes = voronoiDiagram.getPolygonBorderPoints().get(firstNearestNeighbor);
 		newNodes.add(queryPoint);
-		
-		updateGraphNewPolygon(newNodes);
-		
+
+		updateGraphWithNewBorderPoints(newNodes);
+
 		Set<Long> nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(firstNearestNeighbor);
-		
-		for(int i = 2; i < k; i++) {
-			
+
+		for (int i = 2; i <= k; i++) {
+
+			for(Long nearestNeighborCandidatePoI : nextNeighborCandidates) {
+				newNodes = voronoiDiagram.getPolygonBorderPoints().get(nearestNeighborCandidatePoI);
+				updateGraphWithNewBorderPoints(newNodes);
+				
+			}
+			//Adicionar ao final o novo PoI
 		}
-		
+
 		return finalResult;
-		
+
 	}
 
 	/**
@@ -89,48 +96,67 @@ public class KNNVoronoi {
 		return newListOfKnownCandidates;
 
 	}
-	
-	//TODO Refactor this method
-	private void updateGraphNewPolygon(Set<Long> points) {
-		
-//		Set<Long> borderPoints = voronoiDiagram.getPolygonBorderPoints().get(generatorPoI);
-		
-		for(Long borderPointFrom : points) {
+
+	/**
+	 * This method will receive a set of border points and will add them to an
+	 * auxiliary graph that contains only the border points of the nearest
+	 * neighbors for that iteration.
+	 * 
+	 * @param points
+	 *            points that will be added.
+	 */
+	private void updateGraphWithNewBorderPoints(Set<Long> points) {
+
+		for (Long borderPointFrom : points) {
+
 			Node fromNode;
-			//Checking if the node already exists
-			if(borderPointsGraph.getNodeId(graph.getNode(borderPointFrom).getLatitude(), graph.getNode(borderPointFrom).getLongitude()) == null) {
-				fromNode = new NodeImpl(graph.getNode(borderPointFrom).getLatitude(), graph.getNode(borderPointFrom).getLongitude());
+			Long fromNodeId = borderPointsGraph.getNodeId(graph.getNode(borderPointFrom).getLatitude(),
+					graph.getNode(borderPointFrom).getLongitude());
+
+			// Checking if the node already exists
+			if (fromNodeId == null) {
+				fromNode = new NodeImpl(graph.getNode(borderPointFrom).getLatitude(),
+						graph.getNode(borderPointFrom).getLongitude());
+				borderPointsGraph.addNode(fromNode);
 			} else {
-				fromNode = borderPointsGraph.getNearestNode(graph.getNode(borderPointFrom).getLatitude(), graph.getNode(borderPointFrom).getLongitude());
+				fromNode = borderPointsGraph.getNode(fromNodeId);
 			}
-			borderPointsGraph.addNode(fromNode);
-			
-			for(Long borderPointTo : points) {
-				
+
+			for (Long borderPointTo : points) {
+
 				Node toNode;
-				//Checking if the node already exists
-				if(borderPointsGraph.getNodeId(graph.getNode(borderPointTo).getLatitude(), graph.getNode(borderPointTo).getLongitude()) == null) {
-					toNode = new NodeImpl(graph.getNode(borderPointTo).getLatitude(), graph.getNode(borderPointTo).getLongitude());
+				Long toNodeId = borderPointsGraph.getNodeId(graph.getNode(borderPointTo).getLatitude(),
+						graph.getNode(borderPointTo).getLongitude());
+
+				// Checking if the node already exists
+				if (toNodeId == null) {
+					toNode = new NodeImpl(graph.getNode(borderPointTo).getLatitude(),
+							graph.getNode(borderPointTo).getLongitude());
+					borderPointsGraph.addNode(toNode);
 				} else {
-					toNode = borderPointsGraph.getNearestNode(graph.getNode(borderPointTo).getLatitude(), graph.getNode(borderPointTo).getLongitude());
+					toNode = borderPointsGraph.getNode(fromNodeId);
 				}
-				borderPointsGraph.addNode(toNode);
-				
-				Edge newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2BorderDistance().get(borderPointFrom).get(borderPointTo).intValue());
-				
+
+				Edge newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(),
+						voronoiDiagram.getBorder2BorderDistance().get(borderPointFrom).get(borderPointTo).intValue());
+
 				borderPointsGraph.addEdge(newEdge);
-				
+
 			}
-			
-			
-			if(borderPointsGraph.getNodeId(graph.getNode(voronoiDiagram.getBorderNeighbor().get(borderPointFrom).getId()).getLatitude(), graph.getNode(voronoiDiagram.getBorderNeighbor().get(borderPointFrom).getId()).getLongitude()) != null) {
-				Edge crossingEdgeForward = new EdgeImpl(voronoiDiagram.getBorderNeighbor().get(borderPointFrom).getId(), voronoiDiagram.getBorderNeighbor().get(borderPointFrom).getParent(), voronoiDiagram.getBorderNeighbor().get(borderPointFrom).getDistance());
-				Edge crossingEdgeBackward = new EdgeImpl(voronoiDiagram.getBorderNeighbor().get(borderPointFrom).getParent(), voronoiDiagram.getBorderNeighbor().get(borderPointFrom).getId(), voronoiDiagram.getBorderNeighbor().get(borderPointFrom).getDistance());
+
+			DistanceEntry crossingPolygonEntry = voronoiDiagram.getBorderNeighbor().get(borderPointFrom);
+			Long crossingPolygonNodeId = borderPointsGraph.getNodeId(
+					graph.getNode(crossingPolygonEntry.getId()).getLatitude(),
+					graph.getNode(crossingPolygonEntry.getId()).getLongitude());
+
+			if (crossingPolygonNodeId != null) {
+				Edge crossingEdgeForward = new EdgeImpl(crossingPolygonEntry.getId(), crossingPolygonEntry.getParent(),
+						crossingPolygonEntry.getDistance());
+				Edge crossingEdgeBackward = new EdgeImpl(crossingPolygonEntry.getParent(), crossingPolygonEntry.getId(),
+						crossingPolygonEntry.getDistance());
 				borderPointsGraph.addEdge(crossingEdgeForward);
 				borderPointsGraph.addEdge(crossingEdgeBackward);
 			}
-			
 		}
 	}
-
 }
