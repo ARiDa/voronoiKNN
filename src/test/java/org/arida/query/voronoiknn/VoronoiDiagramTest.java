@@ -26,6 +26,7 @@ public class VoronoiDiagramTest {
 	public void runVoronoiTest() {
 
 		StopWatch voronoiPreprocessingSW = new StopWatch();
+		StopWatch voronoiExecutionSW = new StopWatch();
 		long source = 0l;
 		int k = 3;
 
@@ -39,8 +40,12 @@ public class VoronoiDiagramTest {
 
 		KNNVoronoi knn = new KNNVoronoi(graph, voronoiDiagram);
 
+		voronoiExecutionSW.start();
 		knn.executeKNN(source, k);
-
+		voronoiExecutionSW.stop();
+		
+		logger.info("Execution time for the Voronoi Diagram: {}ns", voronoiExecutionSW.getNanos());
+		
 	}
 
 }
