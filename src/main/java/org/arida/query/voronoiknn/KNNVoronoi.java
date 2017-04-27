@@ -1,5 +1,6 @@
 package org.arida.query.voronoiknn;
 
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -48,8 +49,8 @@ public class KNNVoronoi {
 
 		Queue<DistanceEntry> finalResult = new PriorityQueue<>();
 
-		Set<Long> visitedNeighborsCandidates;
-		Set<Long> nextNeighborCandidates;
+		Set<Long> visitedNeighborsCandidates = new HashSet<>();
+		Set<Long> nextNeighborCandidates = new HashSet<>();
 
 		if (k == 0)
 			return finalResult;
@@ -59,6 +60,8 @@ public class KNNVoronoi {
 			return finalResult;
 		}
 
+		finalResult.add(new DistanceEntry(voronoiDiagram.getNodeToPoIMap().get(queryPoint), 0, -1));
+		
 		Long firstNearestNeighbor = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
 
 		// The first iteration will consider all the borderPoints AND the query
@@ -69,7 +72,7 @@ public class KNNVoronoi {
 		updateAuxiliarGraphWithNewBorderPoints(newNodes);
 
 		nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(firstNearestNeighbor);
-		visitedNeighborsCandidates = voronoiDiagram.getAdjacentPolygons().get(firstNearestNeighbor);
+		visitedNeighborsCandidates.add(firstNearestNeighbor);
 
 		Queue<DistanceEntry> nearestNeighbors = new PriorityQueue<>();
 
@@ -84,12 +87,15 @@ public class KNNVoronoi {
 				long to = borderPointsGraph.getNodeId(graph.getNode(nearestNeighborCandidatePoI).getLatitude(), graph.getNode(nearestNeighborCandidatePoI).getLongitude());
 				long distance = dj.shortestPath(from, to).getTotalDistance();
 
-				nearestNeighbors.add(new DistanceEntry(to, (int) distance, -1));
+				nearestNeighbors.add(new DistanceEntry(nearestNeighborCandidatePoI, (int) distance, -1));
 			}
 
-			nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(nearestNeighbors.poll().getId());
+			DistanceEntry nextPoI = nearestNeighbors.poll();
+			finalResult.add(nextPoI);
+			
+			nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(nextPoI.getId());
 			nextNeighborCandidates.removeAll(visitedNeighborsCandidates);
-			visitedNeighborsCandidates.addAll(nextNeighborCandidates);
+			visitedNeighborsCandidates.add(nextPoI.getId());
 
 		}
 
@@ -163,11 +169,18 @@ public class KNNVoronoi {
 			Long crossingPolygonNodeId = borderPointsGraph.getNodeId(
 					graph.getNode(crossingPolygonEntry.getId()).getLatitude(),
 					graph.getNode(crossingPolygonEntry.getId()).getLongitude());
+			
+			
 
 			if (crossingPolygonNodeId != null) {
-				Edge crossingEdgeForward = new EdgeImpl(crossingPolygonEntry.getId(), crossingPolygonEntry.getParent(),
+			
+				Long crossingPolygonParentNodeId = borderPointsGraph.getNodeId(
+						graph.getNode(borderPointFrom).getLatitude(),
+						graph.getNode(borderPointFrom).getLongitude());
+				
+				Edge crossingEdgeForward = new EdgeImpl(crossingPolygonNodeId, crossingPolygonParentNodeId,
 						crossingPolygonEntry.getDistance());
-				Edge crossingEdgeBackward = new EdgeImpl(crossingPolygonEntry.getParent(), crossingPolygonEntry.getId(),
+				Edge crossingEdgeBackward = new EdgeImpl(crossingPolygonParentNodeId, crossingPolygonNodeId,
 						crossingPolygonEntry.getDistance());
 				borderPointsGraph.addEdge(crossingEdgeForward);
 				borderPointsGraph.addEdge(crossingEdgeBackward);

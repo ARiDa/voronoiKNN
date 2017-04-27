@@ -1,7 +1,10 @@
 package org.arida.query.voronoiknn;
 
+import java.util.Queue;
+
 import org.arida.graphgenerator.GraphGenerator;
 import org.graphast.model.Graph;
+import org.graphast.query.route.shortestpath.model.DistanceEntry;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -41,10 +44,18 @@ public class VoronoiDiagramTest {
 		KNNVoronoi knn = new KNNVoronoi(graph, voronoiDiagram);
 
 		voronoiExecutionSW.start();
-		knn.executeKNN(source, k);
+		Queue<DistanceEntry> finalResult = knn.executeKNN(source, k);
 		voronoiExecutionSW.stop();
 		
 		logger.info("Execution time for the Voronoi Diagram: {}ns", voronoiExecutionSW.getNanos());
+		
+		int size = finalResult.size();
+		
+		for(int i = 1; i<= size; i++) {
+			DistanceEntry poi = finalResult.poll();
+			logger.info("k = {}", i);
+			logger.info("\tPoI: {}, Distance = {}", poi.getId(), poi.getDistance());
+		}
 		
 	}
 
