@@ -9,8 +9,5 @@ Based on *Kolahdouzan, Mohammad, and Cyrus Shahabi. "Voronoi-based k nearest nei
 In this implementation, border points are no shared by adjacent polygons. Instead, an edge connect them.
 
 ### R-Tree
-<<<<<<< HEAD
+
 The current version is not using a R-Tree index to find the first nearest neighbor. In the pre-processing step we creat a Map structure to store this kind of information. Should be improved in the comming versions.
-=======
-The current version is not using a R-Tree index to find the first nearest neighbor. In the pre-processing step we creat a Map structure to store this kind of information. Should be improved in the comming versions.
->>>>>>> Fixing README.md
