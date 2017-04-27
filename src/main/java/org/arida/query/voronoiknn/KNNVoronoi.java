@@ -25,6 +25,7 @@ public class KNNVoronoi {
 	Graph borderPointsGraph = new GraphImpl(Configuration.USER_HOME + "/graphast/test/borderPointsGraph");
 	Queue<DistanceEntry> finalNearestNeighbors = new PriorityQueue<>();
 	Queue<DistanceEntry> candidatePoIs = new PriorityQueue<>();
+	long queryPoint = 0l;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -42,6 +43,8 @@ public class KNNVoronoi {
 	 *            the number of neighbors that will be returned
 	 */
 	public Queue<DistanceEntry> executeKNN(long queryPoint, int k) {
+
+		this.queryPoint = queryPoint;
 
 		Queue<DistanceEntry> finalResult = new PriorityQueue<>();
 
@@ -74,11 +77,14 @@ public class KNNVoronoi {
 
 			for (Long nearestNeighborCandidatePoI : nextNeighborCandidates) {
 				newNodes = voronoiDiagram.getPolygonBorderPoints().get(nearestNeighborCandidatePoI);
+				newNodes.add(nearestNeighborCandidatePoI);
 				updateAuxiliarGraphWithNewBorderPoints(newNodes);
 				Dijkstra dj = new DijkstraConstantWeight(borderPointsGraph);
-				long distance = dj.shortestPath(queryPoint, nearestNeighborCandidatePoI).getTotalDistance();
+				long from = borderPointsGraph.getNodeId(graph.getNode(queryPoint).getLatitude(), graph.getNode(queryPoint).getLongitude());
+				long to = borderPointsGraph.getNodeId(graph.getNode(nearestNeighborCandidatePoI).getLatitude(), graph.getNode(nearestNeighborCandidatePoI).getLongitude());
+				long distance = dj.shortestPath(from, to).getTotalDistance();
 
-				nearestNeighbors.add(new DistanceEntry(nearestNeighborCandidatePoI, (int) distance, -1));
+				nearestNeighbors.add(new DistanceEntry(to, (int) distance, -1));
 			}
 
 			nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(nearestNeighbors.poll().getId());
@@ -131,20 +137,19 @@ public class KNNVoronoi {
 					toNode = borderPointsGraph.getNode(toNodeId);
 				}
 
-				if (fromNode.getId() == toNode.getId())
+				if (fromNode.getId().equals(toNode.getId()))
 					continue;
 
 				Edge newEdge;
-				
-				if (voronoiDiagram.getBorder2BorderDistance().get(borderPointFrom) == null
-						|| voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null) {
-					newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(),
-							voronoiDiagram.getNode2BorderDistance().get(borderPointFrom).get(borderPointTo).intValue());
+
+				if(voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null || voronoiDiagram.getBorder2BorderDistance().get(borderPointFrom) == null) {
+					if(voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null) {
+						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getNode2BorderDistance().get(borderPointFrom).get(borderPointTo).intValue());
+					} else {
+						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getNode2BorderDistance().get(borderPointTo).get(borderPointFrom).intValue());
+					}
 				} else {
-
-					newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram
-							.getBorder2BorderDistance().get(borderPointFrom).get(borderPointTo).intValue());
-
+					newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2BorderDistance().get(borderPointTo).get(borderPointFrom).intValue());
 				}
 
 				borderPointsGraph.addEdge(newEdge);
@@ -152,6 +157,9 @@ public class KNNVoronoi {
 			}
 
 			DistanceEntry crossingPolygonEntry = voronoiDiagram.getBorderNeighbor().get(borderPointFrom);
+			if(crossingPolygonEntry == null)
+				continue;
+			
 			Long crossingPolygonNodeId = borderPointsGraph.getNodeId(
 					graph.getNode(crossingPolygonEntry.getId()).getLatitude(),
 					graph.getNode(crossingPolygonEntry.getId()).getLongitude());
