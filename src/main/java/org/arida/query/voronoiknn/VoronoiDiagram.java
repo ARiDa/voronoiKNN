@@ -56,12 +56,20 @@ public class VoronoiDiagram {
 	private Map<Long, Map<Long, Long>> poi2BorderDistance = new HashMap<>();
 
 	/**
+	 * node2PoiDistance will store the distance between all nodes and their
+	 * respective Point of Interest (PoI). A HashMap that maps the nodes
+	 * (NodeID-Long) to a HashMap that maps the Point of Interest (NodeID-Long)
+	 * to the distance (distance - Integer) between them.
+	 */
+	private Map<Long, Map<Long, Long>> node2PoiDistance = new HashMap<>();
+
+	/**
 	 * border2NodeDistance will store the distance between all border points to
 	 * all nodes inside of the same polygon. A HashMap that maps the border
 	 * point (NodeID-Long) to a HashMap that maps the Node (NodeID-Long) to the
 	 * distance (distance - Integer) between them.
 	 */
-	private Map<Long, Map<Long, Long>> node2BorderDistance = new HashMap<>();
+	private Map<Long, Map<Long, Long>> border2NodeDistance = new HashMap<>();
 
 	/**
 	 * polygonBorderPoints will store all borderPoints that belongs to a certain
@@ -112,7 +120,7 @@ public class VoronoiDiagram {
 		// for each Point of Interest
 		for (Node poi : g.getPOIsNodes()) {
 			DijkstraVD dj = new DijkstraVD(g, poi, globalSettleNodes, globalUnsettleNodes, polygonBorderPoints,
-					nodeToPoIMap, poiToNodesMap, adjacentPolygons, borderNeighbor);
+					nodeToPoIMap, poiToNodesMap, adjacentPolygons, borderNeighbor, node2PoiDistance);
 			dijkstraHash.put(poi.getId(), dj);
 			polygonBorderPoints.put(poi.getId(), new HashSet<Long>());
 			poiToNodesMap.put(poi.getId(), new HashSet<Long>());
@@ -169,7 +177,7 @@ public class VoronoiDiagram {
 				for (Long node : poiToNodesMap.get(poi)) {
 					distance = calculateNode2BorderDistances(node, sourceBorderPoint);
 					nodeDistance.put(node, distance);
-					node2BorderDistance.put(sourceBorderPoint, nodeDistance);
+					border2NodeDistance.put(sourceBorderPoint, nodeDistance);
 				}
 			}
 		}
@@ -210,8 +218,8 @@ public class VoronoiDiagram {
 		return poi2BorderDistance;
 	}
 
-	public Map<Long, Map<Long, Long>> getNode2BorderDistance() {
-		return node2BorderDistance;
+	public Map<Long, Map<Long, Long>> getBorder2NodeDistance() {
+		return border2NodeDistance;
 	}
 
 	public Map<Long, HashSet<Long>> getPolygonBorderPoints() {
@@ -220,6 +228,10 @@ public class VoronoiDiagram {
 
 	public Map<Long, DistanceEntry> getBorderNeighbor() {
 		return borderNeighbor;
+	}
+
+	public Map<Long, Map<Long, Long>> getNode2PoiDistance() {
+		return node2PoiDistance;
 	}
 	
 }

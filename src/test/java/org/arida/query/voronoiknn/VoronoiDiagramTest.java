@@ -30,7 +30,7 @@ public class VoronoiDiagramTest {
 
 		StopWatch voronoiPreprocessingSW = new StopWatch();
 		StopWatch voronoiExecutionSW = new StopWatch();
-		long source = 0l;
+		long source = 7l;
 		int k = 3;
 
 		VoronoiDiagram voronoiDiagram = new VoronoiDiagram(graph);

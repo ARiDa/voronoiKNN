@@ -150,9 +150,9 @@ public class KNNVoronoi {
 
 				if(voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null || voronoiDiagram.getBorder2BorderDistance().get(borderPointFrom) == null) {
 					if(voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null) {
-						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getNode2BorderDistance().get(borderPointFrom).get(borderPointTo).intValue());
+						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2NodeDistance().get(borderPointFrom).get(borderPointTo).intValue());
 					} else {
-						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getNode2BorderDistance().get(borderPointTo).get(borderPointFrom).intValue());
+						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2NodeDistance().get(borderPointTo).get(borderPointFrom).intValue());
 					}
 				} else {
 					newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2BorderDistance().get(borderPointTo).get(borderPointFrom).intValue());
