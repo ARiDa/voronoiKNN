@@ -30,7 +30,7 @@ public class DijkstraVD {
 	private Map<Long, Set<Long>> poiToNodesMap = new HashMap<>();
 	private Map<Long, Set<Long>> adjacentPolygons = new HashMap<>();
 	private Map<Long, DistanceEntry> borderNeighbor = new HashMap<>();
-	Map<Long, Map<Long, Long>> node2PoiDistance = new HashMap<>();
+	Map<Long, Map<Long, Integer>> node2PoiDistance = new HashMap<>();
 	private Node source;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -47,7 +47,7 @@ public class DijkstraVD {
 	public DijkstraVD(Graph graph, Node source, Set<Long> globalSettleNodes, Queue<DistanceEntry> globalUnsettleNodes,
 			Map<Long, HashSet<Long>> polygonBorderPoints, Map<Long, Long> nodeToPoIMap,
 			Map<Long, Set<Long>> poiToNodesMap, Map<Long, Set<Long>> adjacentPolygons,
-			Map<Long, DistanceEntry> borderNeighbor, Map<Long, Map<Long, Long>> node2PoiDistance) {
+			Map<Long, DistanceEntry> borderNeighbor, Map<Long, Map<Long, Integer>> node2PoiDistance) {
 
 		this.graph = graph;
 		this.source = source;
@@ -76,9 +76,11 @@ public class DijkstraVD {
 		removed = queue.poll();
 		logger.debug("Node being analyzed: {}", removed.getId());
 
-		Map<Long, Long> newDistance = new HashMap<>();
-		newDistance.put(source.getId(), (long) removed.getDistance());
-		node2PoiDistance.put(removed.getId(), newDistance);
+		Map<Long, Integer> newDistance = new HashMap<>();
+		newDistance.put(source.getId(), removed.getDistance());
+		
+		if(!nodeToPoIMap.containsValue(removed.getId()))
+			node2PoiDistance.put(removed.getId(), newDistance);
 		
 		if (globalSettleNodes.contains(removed.getId())) {
 

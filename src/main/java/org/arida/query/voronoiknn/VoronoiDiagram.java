@@ -61,7 +61,7 @@ public class VoronoiDiagram {
 	 * (NodeID-Long) to a HashMap that maps the Point of Interest (NodeID-Long)
 	 * to the distance (distance - Integer) between them.
 	 */
-	private Map<Long, Map<Long, Long>> node2PoiDistance = new HashMap<>();
+	private Map<Long, Map<Long, Integer>> node2PoiDistance = new HashMap<>();
 
 	/**
 	 * border2NodeDistance will store the distance between all border points to
@@ -230,7 +230,7 @@ public class VoronoiDiagram {
 		return borderNeighbor;
 	}
 
-	public Map<Long, Map<Long, Long>> getNode2PoiDistance() {
+	public Map<Long, Map<Long, Integer>> getNode2PoiDistance() {
 		return node2PoiDistance;
 	}
 	

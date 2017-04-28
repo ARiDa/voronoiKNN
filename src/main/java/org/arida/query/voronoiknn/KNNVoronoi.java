@@ -60,8 +60,11 @@ public class KNNVoronoi {
 			return finalResult;
 		}
 
-		finalResult.add(new DistanceEntry(voronoiDiagram.getNodeToPoIMap().get(queryPoint), 0, -1));
-		
+		Long firstNearestNeighborID = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
+
+		finalResult.add(new DistanceEntry(firstNearestNeighborID, voronoiDiagram.getNode2PoiDistance()
+				.get(queryPoint).get(firstNearestNeighborID), -1));
+
 		Long firstNearestNeighbor = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
 
 		// The first iteration will consider all the borderPoints AND the query
@@ -83,8 +86,10 @@ public class KNNVoronoi {
 				newNodes.add(nearestNeighborCandidatePoI);
 				updateAuxiliarGraphWithNewBorderPoints(newNodes);
 				Dijkstra dj = new DijkstraConstantWeight(borderPointsGraph);
-				long from = borderPointsGraph.getNodeId(graph.getNode(queryPoint).getLatitude(), graph.getNode(queryPoint).getLongitude());
-				long to = borderPointsGraph.getNodeId(graph.getNode(nearestNeighborCandidatePoI).getLatitude(), graph.getNode(nearestNeighborCandidatePoI).getLongitude());
+				long from = borderPointsGraph.getNodeId(graph.getNode(queryPoint).getLatitude(),
+						graph.getNode(queryPoint).getLongitude());
+				long to = borderPointsGraph.getNodeId(graph.getNode(nearestNeighborCandidatePoI).getLatitude(),
+						graph.getNode(nearestNeighborCandidatePoI).getLongitude());
 				long distance = dj.shortestPath(from, to).getTotalDistance();
 
 				nearestNeighbors.add(new DistanceEntry(nearestNeighborCandidatePoI, (int) distance, -1));
@@ -92,7 +97,7 @@ public class KNNVoronoi {
 
 			DistanceEntry nextPoI = nearestNeighbors.poll();
 			finalResult.add(nextPoI);
-			
+
 			nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(nextPoI.getId());
 			nextNeighborCandidates.removeAll(visitedNeighborsCandidates);
 			visitedNeighborsCandidates.add(nextPoI.getId());
@@ -148,14 +153,18 @@ public class KNNVoronoi {
 
 				Edge newEdge;
 
-				if(voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null || voronoiDiagram.getBorder2BorderDistance().get(borderPointFrom) == null) {
-					if(voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null) {
-						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2NodeDistance().get(borderPointFrom).get(borderPointTo).intValue());
+				if (voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null
+						|| voronoiDiagram.getBorder2BorderDistance().get(borderPointFrom) == null) {
+					if (voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null) {
+						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2NodeDistance()
+								.get(borderPointFrom).get(borderPointTo).intValue());
 					} else {
-						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2NodeDistance().get(borderPointTo).get(borderPointFrom).intValue());
+						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2NodeDistance()
+								.get(borderPointTo).get(borderPointFrom).intValue());
 					}
 				} else {
-					newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2BorderDistance().get(borderPointTo).get(borderPointFrom).intValue());
+					newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2BorderDistance()
+							.get(borderPointTo).get(borderPointFrom).intValue());
 				}
 
 				borderPointsGraph.addEdge(newEdge);
@@ -163,21 +172,18 @@ public class KNNVoronoi {
 			}
 
 			DistanceEntry crossingPolygonEntry = voronoiDiagram.getBorderNeighbor().get(borderPointFrom);
-			if(crossingPolygonEntry == null)
+			if (crossingPolygonEntry == null)
 				continue;
-			
+
 			Long crossingPolygonNodeId = borderPointsGraph.getNodeId(
 					graph.getNode(crossingPolygonEntry.getId()).getLatitude(),
 					graph.getNode(crossingPolygonEntry.getId()).getLongitude());
-			
-			
 
 			if (crossingPolygonNodeId != null) {
-			
+
 				Long crossingPolygonParentNodeId = borderPointsGraph.getNodeId(
-						graph.getNode(borderPointFrom).getLatitude(),
-						graph.getNode(borderPointFrom).getLongitude());
-				
+						graph.getNode(borderPointFrom).getLatitude(), graph.getNode(borderPointFrom).getLongitude());
+
 				Edge crossingEdgeForward = new EdgeImpl(crossingPolygonNodeId, crossingPolygonParentNodeId,
 						crossingPolygonEntry.getDistance());
 				Edge crossingEdgeBackward = new EdgeImpl(crossingPolygonParentNodeId, crossingPolygonNodeId,
