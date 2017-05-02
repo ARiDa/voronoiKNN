@@ -139,6 +139,7 @@ public class VoronoiDiagram {
 
 		}
 
+		discoverBorderPoints();
 		calculateBorderDistances();
 
 	}
@@ -146,6 +147,46 @@ public class VoronoiDiagram {
 	// TODO This method should be changed to use R-tree
 	public long contains(long node) {
 		return nodeToPoIMap.get(node);
+	}
+
+	private void discoverBorderPoints() {
+		g.reverseGraph();
+		
+		globalSettleNodes = new HashSet<>();
+		globalUnsettleNodes = new PriorityQueue<>();
+		
+		dijkstraHash = new HashMap<>();
+		
+		for (Node poi : g.getPOIsNodes()) {
+			DistanceEntry distancePoI = new DistanceEntry(poi.getId(), 0, -1);
+			globalUnsettleNodes.add(distancePoI);
+
+			pois.put(poi.getId(), poi);
+		}
+		
+		// Initialize a Hash with an instance of Dijkstra Algorithm
+		// for each Point of Interest
+		for (Node poi : g.getPOIsNodes()) {
+			DijkstraVD dj = new DijkstraVD(g, poi, globalSettleNodes, globalUnsettleNodes, polygonBorderPoints,
+					nodeToPoIMap, poiToNodesMap, adjacentPolygons, borderNeighbor, node2PoiDistance);
+			dijkstraHash.put(poi.getId(), dj);
+//			polygonBorderPoints.put(poi.getId(), new HashSet<Long>());
+//			poiToNodesMap.put(poi.getId(), new HashSet<Long>());
+//			adjacentPolygons.put(poi.getId(), new HashSet<Long>());
+
+		}
+
+		// Corresponds to one iteration of vertex expansion, picking
+		// always the PoI with lowest node in the unsettle queue
+		while (!globalUnsettleNodes.isEmpty()) {
+
+			Long currentPoIID = pois.get(globalUnsettleNodes.poll().getId()).getId();
+
+			logger.debug("PoI being iterated: {}", currentPoIID);
+			dijkstraHash.get(currentPoIID).iterateBorder();
+
+		}
+		g.reverseGraph();
 	}
 
 	private void calculateBorderDistances() {
@@ -233,5 +274,5 @@ public class VoronoiDiagram {
 	public Map<Long, Map<Long, Integer>> getNode2PoiDistance() {
 		return node2PoiDistance;
 	}
-	
+
 }

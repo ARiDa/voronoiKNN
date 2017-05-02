@@ -68,17 +68,17 @@ public class VoronoiDiagramTest {
 		StopWatch voronoiPreprocessingSW = new StopWatch();
 		StopWatch voronoiExecutionSW = new StopWatch();
 		long source = 0;
-		int k = 2;
+		int k = 3;
 		
-//		graphHopperExample4.reverseGraph();
+		graphHopperExample4.reverseGraph();
 		
 		VoronoiDiagram voronoiDiagram = new VoronoiDiagram(graphHopperExample4);
 
 		voronoiPreprocessingSW.start();
 		voronoiDiagram.createDiagram();
 		voronoiPreprocessingSW.stop();
-//		graphHopperExample4.reverseGraph();
-
+		graphHopperExample4.reverseGraph();
+//		voronoiDiagram.getPolygonBorderPoints()
 		logger.info("Preprocessing time for the Voronoi Diagram: {}ns", voronoiPreprocessingSW.getNanos());
 		KNNVoronoi knn = new KNNVoronoi(graphHopperExample4, voronoiDiagram);
 

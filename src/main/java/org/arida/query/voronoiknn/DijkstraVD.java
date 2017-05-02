@@ -84,19 +84,6 @@ public class DijkstraVD {
 
 		if (globalSettleNodes.contains(removed.getId())) {
 
-			Set<Long> newAdjacentSet = adjacentPolygons.get(source.getId());
-			newAdjacentSet.add(nodeToPoIMap.get(removed.getId()));
-			adjacentPolygons.replace(source.getId(), newAdjacentSet);
-
-			HashSet<Long> newBorderSet = polygonBorderPoints.get(source.getId());
-			newBorderSet.add(removed.getParent());
-			polygonBorderPoints.replace(source.getId(), newBorderSet);
-
-			DistanceEntry borderEdgeDistanceEntry = new DistanceEntry(removed.getId(),
-					graph.getEdge(removed.getParent(), removed.getId()).getDistance(),
-					nodeToPoIMap.get(removed.getId()));
-			borderNeighbor.put(removed.getParent(), borderEdgeDistanceEntry);
-
 			return;
 
 		} else {
@@ -121,8 +108,97 @@ public class DijkstraVD {
 		Long2IntMap neighbors = graph.accessNeighborhood(graph.getNode(removed.getId()));
 
 		for (long vid : neighbors.keySet()) {
+			
+			DistanceEntry newEntry = new DistanceEntry(vid, removed.getDistance() + neighbors.get(vid),
+					removed.getId());
+
+			Edge edge = null;
+			int distance = -1;
+
+			if (!wasTraversed.containsKey(vid)) {
+
+				queue.offer(newEntry);
+				// colocar esse nó na queue global
+
+				// Verificar se ja existe esse nó no globalSettleNodes. Se sim,
+				// colocar a distancia
+				// como border distance
+				// colocar esse nó na globalPriorityQueue
+
+				wasTraversed.put(newEntry.getId(), newEntry.getDistance());
+
+				distance = neighbors.get(vid);
+				edge = getEdge(removed.getId(), vid, distance);
+
+				parents.put(vid, new RouteEntry(removed.getId(), distance, edge.getId(), edge.getLabel()));
+
+				// TODO Create a similar class, just like the DistanceEntry.
+				// Esse é uma entrada especial. Está apenas mapeando a atual
+				// distancia para o PoI correpondente
+				globalUnsettleNodes.add(new DistanceEntry(source.getId(), newEntry.getDistance(), vid));
+
+			} else {
+
+				int cost = wasTraversed.get(vid);
+				distance = newEntry.getDistance();
+
+				if (cost != wasRemoved) {
+					if (cost > distance) {
+						queue.remove(newEntry);
+						queue.offer(newEntry);
+
+						wasTraversed.remove(newEntry.getId());
+
+						wasTraversed.put(newEntry.getId(), newEntry.getDistance());
+
+						// TODO Double check if this is working
+						newEntry.setId(source.getId());
+						newEntry.setParent(vid);
+						newEntry.setDistance(distance);
+						globalUnsettleNodes.remove(newEntry);
+						globalUnsettleNodes.add(new DistanceEntry(source.getId(), distance, vid));
+
+						parents.remove(vid);
+						distance = neighbors.get(vid);
+						edge = getEdge(removed.getId(), vid, distance);
+						parents.put(vid, new RouteEntry(removed.getId(), distance, edge.getId(), edge.getLabel()));
+
+					}
+				}
+			}
+		}
+	}
+	
+	public void iterateBorder() {
+
+		removed = queue.poll();
+		logger.debug("Node being analyzed: {}", removed.getId());
+
+		if (!nodeToPoIMap.get(removed.getId()).equals(source.getId())) {
+
+			return;
+
+		} else {
+
+			wasTraversed.put(removed.getId(), wasRemoved);
+			globalSettleNodes.add(removed.getId());
+
+		}
+
+		expandVertexBorder(removed, queue, parents, wasTraversed, wasTraversedPoI);
+
+	}
+	
+	public void expandVertexBorder(DistanceEntry removed, Queue<DistanceEntry> queue, Map<Long, RouteEntry> parents,
+			Map<Long, Integer> wasTraversed, Map<Long, Integer> wasTraversedPoI) {
+
+		Long2IntMap neighbors = graph.accessNeighborhood(graph.getNode(removed.getId()));
+
+		for (long vid : neighbors.keySet()) {
+			
 			if (nodeToPoIMap.get(vid) != null) {
 				if (!nodeToPoIMap.get(vid).equals(source.getId())) {
+					
 					Set<Long> newAdjacentSet = adjacentPolygons.get(source.getId());
 					newAdjacentSet.add(nodeToPoIMap.get(vid));
 					adjacentPolygons.replace(source.getId(), newAdjacentSet);
@@ -133,9 +209,12 @@ public class DijkstraVD {
 
 					DistanceEntry borderEdgeDistanceEntry = new DistanceEntry(vid, neighbors.get(vid), removed.getId());
 					borderNeighbor.put(removed.getId(), borderEdgeDistanceEntry);
+					
 				}
+				
+				
 			}
-
+			
 			DistanceEntry newEntry = new DistanceEntry(vid, removed.getDistance() + neighbors.get(vid),
 					removed.getId());
 

@@ -56,13 +56,12 @@ public class KNNVoronoi {
 			return finalResult;
 
 		Long firstNearestNeighborID = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
-		finalResult.add(new DistanceEntry(firstNearestNeighborID, voronoiDiagram.getNode2PoiDistance()
-				.get(queryPoint).get(firstNearestNeighborID), -1));
+		finalResult.add(new DistanceEntry(firstNearestNeighborID,
+				voronoiDiagram.getNode2PoiDistance().get(queryPoint).get(firstNearestNeighborID), -1));
 
 		if (k == 1) {
 			return finalResult;
 		}
-
 
 		Long firstNearestNeighbor = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
 
@@ -181,14 +180,39 @@ public class KNNVoronoi {
 			if (crossingPolygonNodeId != null) {
 
 				Long crossingPolygonParentNodeId = borderPointsGraph.getNodeId(
-						graph.getNode(borderPointFrom).getLatitude(), graph.getNode(borderPointFrom).getLongitude());
+						graph.getNode(crossingPolygonEntry.getParent()).getLatitude(),
+						graph.getNode(crossingPolygonEntry.getParent()).getLongitude());
 
-				Edge crossingEdgeForward = new EdgeImpl(crossingPolygonNodeId, crossingPolygonParentNodeId,
-						crossingPolygonEntry.getDistance());
-				Edge crossingEdgeBackward = new EdgeImpl(crossingPolygonParentNodeId, crossingPolygonNodeId,
+				Edge crossingEdgeForward = new EdgeImpl(crossingPolygonParentNodeId, crossingPolygonNodeId,
 						crossingPolygonEntry.getDistance());
 				borderPointsGraph.addEdge(crossingEdgeForward);
-				borderPointsGraph.addEdge(crossingEdgeBackward);
+			}
+
+			DistanceEntry crossingPolygonEntryBackwards = voronoiDiagram.getBorderNeighbor()
+					.get(crossingPolygonEntry.getId());
+			if (crossingPolygonEntryBackwards == null)
+				continue;
+
+			Long crossingPolygonBackwardsNodeId = borderPointsGraph.getNodeId(
+					graph.getNode(crossingPolygonEntryBackwards.getId()).getLatitude(),
+					graph.getNode(crossingPolygonEntryBackwards.getId()).getLongitude());
+
+			if (crossingPolygonBackwardsNodeId != null) {
+
+				Long crossingPolygonBackwardsParentNodeId = borderPointsGraph.getNodeId(
+						graph.getNode(crossingPolygonEntryBackwards.getParent()).getLatitude(),
+						graph.getNode(crossingPolygonEntryBackwards.getParent()).getLongitude());
+				
+				if(crossingPolygonBackwardsParentNodeId == null)
+					continue;
+
+				if (borderPointsGraph.getEdge(crossingPolygonBackwardsParentNodeId,
+						crossingPolygonBackwardsNodeId) == null) {
+
+					Edge crossingEdgeForward = new EdgeImpl(crossingPolygonBackwardsParentNodeId,
+							crossingPolygonBackwardsNodeId, crossingPolygonEntryBackwards.getDistance());
+					borderPointsGraph.addEdge(crossingEdgeForward);
+				}
 			}
 		}
 	}
