@@ -78,10 +78,10 @@ public class DijkstraVD {
 
 		Map<Long, Integer> newDistance = new HashMap<>();
 		newDistance.put(source.getId(), removed.getDistance());
-		
-		if(!nodeToPoIMap.containsValue(removed.getId()))
+
+		if (!nodeToPoIMap.containsKey(removed.getId()))
 			node2PoiDistance.put(removed.getId(), newDistance);
-		
+
 		if (globalSettleNodes.contains(removed.getId())) {
 
 			Set<Long> newAdjacentSet = adjacentPolygons.get(source.getId());
@@ -121,6 +121,20 @@ public class DijkstraVD {
 		Long2IntMap neighbors = graph.accessNeighborhood(graph.getNode(removed.getId()));
 
 		for (long vid : neighbors.keySet()) {
+			if (nodeToPoIMap.get(vid) != null) {
+				if (!nodeToPoIMap.get(vid).equals(source.getId())) {
+					Set<Long> newAdjacentSet = adjacentPolygons.get(source.getId());
+					newAdjacentSet.add(nodeToPoIMap.get(vid));
+					adjacentPolygons.replace(source.getId(), newAdjacentSet);
+
+					HashSet<Long> newBorderSet = polygonBorderPoints.get(source.getId());
+					newBorderSet.add(removed.getId());
+					polygonBorderPoints.replace(source.getId(), newBorderSet);
+
+					DistanceEntry borderEdgeDistanceEntry = new DistanceEntry(vid, neighbors.get(vid), removed.getId());
+					borderNeighbor.put(removed.getId(), borderEdgeDistanceEntry);
+				}
+			}
 
 			DistanceEntry newEntry = new DistanceEntry(vid, removed.getDistance() + neighbors.get(vid),
 					removed.getId());
@@ -161,11 +175,6 @@ public class DijkstraVD {
 						queue.offer(newEntry);
 
 						wasTraversed.remove(newEntry.getId());
-
-						// colocar esse nó na globalPriorityQueue
-						// TODO
-						// globalPriorityQueue.add(new
-						// DistanceEntry(source.getId(), distance, -1l));
 
 						wasTraversed.put(newEntry.getId(), newEntry.getDistance());
 

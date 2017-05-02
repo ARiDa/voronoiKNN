@@ -55,15 +55,14 @@ public class KNNVoronoi {
 		if (k == 0)
 			return finalResult;
 
+		Long firstNearestNeighborID = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
+		finalResult.add(new DistanceEntry(firstNearestNeighborID, voronoiDiagram.getNode2PoiDistance()
+				.get(queryPoint).get(firstNearestNeighborID), -1));
+
 		if (k == 1) {
-			finalResult.add(new DistanceEntry(voronoiDiagram.getNodeToPoIMap().get(queryPoint), 0, -1));
 			return finalResult;
 		}
 
-		Long firstNearestNeighborID = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
-
-		finalResult.add(new DistanceEntry(firstNearestNeighborID, voronoiDiagram.getNode2PoiDistance()
-				.get(queryPoint).get(firstNearestNeighborID), -1));
 
 		Long firstNearestNeighbor = voronoiDiagram.getNodeToPoIMap().get(queryPoint);
 
