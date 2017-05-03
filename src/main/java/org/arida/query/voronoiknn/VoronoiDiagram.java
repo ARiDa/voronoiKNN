@@ -90,7 +90,7 @@ public class VoronoiDiagram {
 	 * borderNeighbor will store the relation between two border points from
 	 * adjacent polygons.
 	 */
-	private Map<Long, DistanceEntry> borderNeighbor = new HashMap<>();
+	private Map<Long, Set<DistanceEntry>> borderNeighbor = new HashMap<>();
 
 	private Set<Long> globalSettleNodes = new HashSet<>();
 	private Queue<DistanceEntry> globalUnsettleNodes = new PriorityQueue<>();
@@ -267,7 +267,7 @@ public class VoronoiDiagram {
 		return polygonBorderPoints;
 	}
 
-	public Map<Long, DistanceEntry> getBorderNeighbor() {
+	public Map<Long, Set<DistanceEntry>> getBorderNeighbor() {
 		return borderNeighbor;
 	}
 
