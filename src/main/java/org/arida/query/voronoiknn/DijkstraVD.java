@@ -108,7 +108,7 @@ public class DijkstraVD {
 		Long2IntMap neighbors = graph.accessNeighborhood(graph.getNode(removed.getId()));
 
 		for (long vid : neighbors.keySet()) {
-			
+
 			DistanceEntry newEntry = new DistanceEntry(vid, removed.getDistance() + neighbors.get(vid),
 					removed.getId());
 
@@ -168,7 +168,7 @@ public class DijkstraVD {
 			}
 		}
 	}
-	
+
 	public void iterateBorder() {
 
 		removed = queue.poll();
@@ -188,17 +188,17 @@ public class DijkstraVD {
 		expandVertexBorder(removed, queue, parents, wasTraversed, wasTraversedPoI);
 
 	}
-	
+
 	public void expandVertexBorder(DistanceEntry removed, Queue<DistanceEntry> queue, Map<Long, RouteEntry> parents,
 			Map<Long, Integer> wasTraversed, Map<Long, Integer> wasTraversedPoI) {
 
-		Long2IntMap neighbors = graph.accessNeighborhood(graph.getNode(removed.getId()));
+		Long2IntMap outgoingNeighbors = graph.accessNeighborhood(graph.getNode(removed.getId()));
 
-		for (long vid : neighbors.keySet()) {
-			
+		for (long vid : outgoingNeighbors.keySet()) {
+
 			if (nodeToPoIMap.get(vid) != null) {
 				if (!nodeToPoIMap.get(vid).equals(source.getId())) {
-					
+
 					Set<Long> newAdjacentSet = adjacentPolygons.get(source.getId());
 					newAdjacentSet.add(nodeToPoIMap.get(vid));
 					adjacentPolygons.replace(source.getId(), newAdjacentSet);
@@ -207,15 +207,29 @@ public class DijkstraVD {
 					newBorderSet.add(removed.getId());
 					polygonBorderPoints.replace(source.getId(), newBorderSet);
 
-					DistanceEntry borderEdgeDistanceEntry = new DistanceEntry(vid, neighbors.get(vid), removed.getId());
+					DistanceEntry borderEdgeDistanceEntry = new DistanceEntry(vid, outgoingNeighbors.get(vid),
+							removed.getId());
 					borderNeighbor.put(removed.getId(), borderEdgeDistanceEntry);
 					
+					if(graph.getEdge(vid, removed.getId())!=null) {
+						Set<Long> newAdjacentSetBackwards = adjacentPolygons.get(nodeToPoIMap.get(vid));
+						newAdjacentSetBackwards.add(source.getId());
+						adjacentPolygons.replace(nodeToPoIMap.get(vid), newAdjacentSetBackwards);
+						
+						DistanceEntry borderEdgeBackwardDistanceEntry = new DistanceEntry(removed.getId(), outgoingNeighbors.get(vid), vid);
+						borderNeighbor.put(vid, borderEdgeBackwardDistanceEntry);
+					}
+					
+					HashSet<Long> newBorderSetBackwards = polygonBorderPoints.get(nodeToPoIMap.get(vid));
+					newBorderSetBackwards.add(vid);
+					polygonBorderPoints.replace(nodeToPoIMap.get(vid), newBorderSetBackwards);
+					
+
 				}
-				
-				
+
 			}
-			
-			DistanceEntry newEntry = new DistanceEntry(vid, removed.getDistance() + neighbors.get(vid),
+
+			DistanceEntry newEntry = new DistanceEntry(vid, removed.getDistance() + outgoingNeighbors.get(vid),
 					removed.getId());
 
 			Edge edge = null;
@@ -233,7 +247,7 @@ public class DijkstraVD {
 
 				wasTraversed.put(newEntry.getId(), newEntry.getDistance());
 
-				distance = neighbors.get(vid);
+				distance = outgoingNeighbors.get(vid);
 				edge = getEdge(removed.getId(), vid, distance);
 
 				parents.put(vid, new RouteEntry(removed.getId(), distance, edge.getId(), edge.getLabel()));
@@ -265,7 +279,7 @@ public class DijkstraVD {
 						globalUnsettleNodes.add(new DistanceEntry(source.getId(), distance, vid));
 
 						parents.remove(vid);
-						distance = neighbors.get(vid);
+						distance = outgoingNeighbors.get(vid);
 						edge = getEdge(removed.getId(), vid, distance);
 						parents.put(vid, new RouteEntry(removed.getId(), distance, edge.getId(), edge.getLabel()));
 

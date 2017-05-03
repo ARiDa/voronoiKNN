@@ -68,7 +68,7 @@ public class VoronoiDiagramTest {
 		StopWatch voronoiPreprocessingSW = new StopWatch();
 		StopWatch voronoiExecutionSW = new StopWatch();
 		long source = 0;
-		int k = 3;
+		int k = 4;
 		
 		graphHopperExample4.reverseGraph();
 		

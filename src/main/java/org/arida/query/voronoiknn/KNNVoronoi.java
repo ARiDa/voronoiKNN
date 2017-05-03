@@ -127,6 +127,7 @@ public class KNNVoronoi {
 				fromNode = new NodeImpl(borderPointFrom, graph.getNode(borderPointFrom).getLatitude(),
 						graph.getNode(borderPointFrom).getLongitude());
 				borderPointsGraph.addNode(fromNode);
+				System.out.println("Adicionando nó " + fromNode.getId() + ". ID original: " + fromNode.getExternalId());
 			} else {
 				fromNode = borderPointsGraph.getNode(fromNodeId);
 			}
@@ -142,6 +143,7 @@ public class KNNVoronoi {
 					toNode = new NodeImpl(borderPointTo, graph.getNode(borderPointTo).getLatitude(),
 							graph.getNode(borderPointTo).getLongitude());
 					borderPointsGraph.addNode(toNode);
+					System.out.println("Adicionando nó " + toNode.getId() + ". ID original: " + toNode.getExternalId());
 				} else {
 					toNode = borderPointsGraph.getNode(toNodeId);
 				}
@@ -166,6 +168,7 @@ public class KNNVoronoi {
 				}
 
 				borderPointsGraph.addEdge(newEdge);
+				System.out.println("\tAdicionando aresta de " + fromNode.getId() + " para " + toNode.getId());
 
 			}
 
@@ -177,43 +180,61 @@ public class KNNVoronoi {
 					graph.getNode(crossingPolygonEntry.getId()).getLatitude(),
 					graph.getNode(crossingPolygonEntry.getId()).getLongitude());
 
-			if (crossingPolygonNodeId != null) {
-
-				Long crossingPolygonParentNodeId = borderPointsGraph.getNodeId(
-						graph.getNode(crossingPolygonEntry.getParent()).getLatitude(),
-						graph.getNode(crossingPolygonEntry.getParent()).getLongitude());
-
-				Edge crossingEdgeForward = new EdgeImpl(crossingPolygonParentNodeId, crossingPolygonNodeId,
-						crossingPolygonEntry.getDistance());
-				borderPointsGraph.addEdge(crossingEdgeForward);
+			if (crossingPolygonNodeId == null) {
+				Node nextPolygonNode = new NodeImpl(crossingPolygonEntry.getId(),
+						graph.getNode(crossingPolygonEntry.getId()).getLatitude(),
+						graph.getNode(crossingPolygonEntry.getId()).getLongitude());
+				borderPointsGraph.addNode(nextPolygonNode);
+				System.out.println("Adicionando nó do próximo poligono:" + nextPolygonNode.getId() + ". ID original: "
+						+ nextPolygonNode.getExternalId());
+				crossingPolygonNodeId = nextPolygonNode.getId();
 			}
 
-			DistanceEntry crossingPolygonEntryBackwards = voronoiDiagram.getBorderNeighbor()
-					.get(crossingPolygonEntry.getId());
-			if (crossingPolygonEntryBackwards == null)
-				continue;
+			Long crossingPolygonParentNodeId = borderPointsGraph.getNodeId(
+					graph.getNode(crossingPolygonEntry.getParent()).getLatitude(),
+					graph.getNode(crossingPolygonEntry.getParent()).getLongitude());
 
-			Long crossingPolygonBackwardsNodeId = borderPointsGraph.getNodeId(
-					graph.getNode(crossingPolygonEntryBackwards.getId()).getLatitude(),
-					graph.getNode(crossingPolygonEntryBackwards.getId()).getLongitude());
+			Edge crossingEdgeForward = new EdgeImpl(crossingPolygonParentNodeId, crossingPolygonNodeId,
+					crossingPolygonEntry.getDistance());
+			borderPointsGraph.addEdge(crossingEdgeForward);
+			System.out.println("\tAdicionando aresta de TRAVESSIA de " + crossingPolygonParentNodeId + " para "
+					+ crossingPolygonNodeId);
 
-			if (crossingPolygonBackwardsNodeId != null) {
-
-				Long crossingPolygonBackwardsParentNodeId = borderPointsGraph.getNodeId(
-						graph.getNode(crossingPolygonEntryBackwards.getParent()).getLatitude(),
-						graph.getNode(crossingPolygonEntryBackwards.getParent()).getLongitude());
-				
-				if(crossingPolygonBackwardsParentNodeId == null)
-					continue;
-
-				if (borderPointsGraph.getEdge(crossingPolygonBackwardsParentNodeId,
-						crossingPolygonBackwardsNodeId) == null) {
-
-					Edge crossingEdgeForward = new EdgeImpl(crossingPolygonBackwardsParentNodeId,
-							crossingPolygonBackwardsNodeId, crossingPolygonEntryBackwards.getDistance());
-					borderPointsGraph.addEdge(crossingEdgeForward);
-				}
-			}
+			// DistanceEntry crossingPolygonEntryBackwards =
+			// voronoiDiagram.getBorderNeighbor()
+			// .get(crossingPolygonEntry.getId());
+			// if (crossingPolygonEntryBackwards == null)
+			// continue;
+			//
+			// Long crossingPolygonBackwardsNodeId =
+			// borderPointsGraph.getNodeId(
+			// graph.getNode(crossingPolygonEntryBackwards.getId()).getLatitude(),
+			// graph.getNode(crossingPolygonEntryBackwards.getId()).getLongitude());
+			//
+			// if (crossingPolygonBackwardsNodeId != null) {
+			//
+			// Long crossingPolygonBackwardsParentNodeId =
+			// borderPointsGraph.getNodeId(
+			// graph.getNode(crossingPolygonEntryBackwards.getParent()).getLatitude(),
+			// graph.getNode(crossingPolygonEntryBackwards.getParent()).getLongitude());
+			//
+			// if(crossingPolygonBackwardsParentNodeId == null)
+			// continue;
+			//
+			// if
+			// (borderPointsGraph.getEdge(crossingPolygonBackwardsParentNodeId,
+			// crossingPolygonBackwardsNodeId) == null) {
+			//
+			// Edge crossingEdgeForward = new
+			// EdgeImpl(crossingPolygonBackwardsParentNodeId,
+			// crossingPolygonBackwardsNodeId,
+			// crossingPolygonEntryBackwards.getDistance());
+			// borderPointsGraph.addEdge(crossingEdgeForward);
+			// System.out.println("\tAdicionando aresta de TRAVESSIA de " +
+			// crossingPolygonBackwardsParentNodeId + " para " +
+			// crossingPolygonBackwardsNodeId);
+			// }
+			// }
 		}
 	}
 }
