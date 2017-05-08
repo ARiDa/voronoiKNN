@@ -174,6 +174,9 @@ public class DijkstraVD {
 		removed = queue.poll();
 		logger.debug("Node being analyzed: {}", removed.getId());
 
+		if(nodeToPoIMap.get(removed.getId()) == null)
+			return;
+		
 		if (!nodeToPoIMap.get(removed.getId()).equals(source.getId())) {
 
 			return;

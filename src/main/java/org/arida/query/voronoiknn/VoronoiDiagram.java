@@ -204,7 +204,15 @@ public class VoronoiDiagram {
 				Map<Long, Long> borderDistance = new HashMap<>();
 
 				for (Long destinationBorderPoint : polygonBorderPoints.get(poi)) {
-					distance = calculateBorder2BorderDistances(sourceBorderPoint, destinationBorderPoint);
+					
+					try {
+						distance = calculateBorder2BorderDistances(sourceBorderPoint, destinationBorderPoint);
+						
+					} catch (Exception e) {
+						distance = Long.MAX_VALUE;
+					}
+					
+					
 					borderDistance.put(destinationBorderPoint, distance);
 					border2BorderDistance.put(sourceBorderPoint, borderDistance);
 				}
@@ -216,7 +224,13 @@ public class VoronoiDiagram {
 				Map<Long, Long> nodeDistance = new HashMap<>();
 
 				for (Long node : poiToNodesMap.get(poi)) {
-					distance = calculateNode2BorderDistances(node, sourceBorderPoint);
+					
+					try {
+						distance = calculateNode2BorderDistances(node, sourceBorderPoint);
+					} catch (Exception e) {
+						distance = Long.MAX_VALUE;
+					}
+					
 					nodeDistance.put(node, distance);
 					border2NodeDistance.put(sourceBorderPoint, nodeDistance);
 				}
