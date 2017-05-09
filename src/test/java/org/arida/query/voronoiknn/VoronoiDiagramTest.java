@@ -1,13 +1,12 @@
 package org.arida.query.voronoiknn;
 
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.arida.graphgenerator.GraphGenerator;
 import org.graphast.importer.POIImporter;
 import org.graphast.model.Graph;
-import org.graphast.query.route.shortestpath.dijkstra.Dijkstra;
-import org.graphast.query.route.shortestpath.dijkstra.DijkstraConstantWeight;
-import org.graphast.query.route.shortestpath.model.DistanceEntry;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -116,126 +115,127 @@ public class VoronoiDiagramTest {
 	//
 	// }
 
+	// @Test
+	// public void runVoronoiMonacoTest() {
+	//
+	// // StdDraw.setCanvasSize(1280,720);
+	// // StdDraw.setXscale(43.720209, 43.755420);
+	// // StdDraw.setYscale(7.403727, 7.446110);
+	// //
+	// // StdDraw.setPenColor(StdDraw.BLACK);
+	// //
+	// // StdDraw.setPenRadius(0.005);
+	//
+	// StopWatch voronoiPreprocessingSW = new StopWatch();
+	// StopWatch voronoiExecutionSW = new StopWatch();
+	// Long source = graphMonaco.getNodeId(43.72842465479131,
+	// 7.414896579419745);
+	// int k = 777;
+	//
+	// graphMonaco.reverseGraph();
+	//
+	// VoronoiDiagram voronoiDiagram = new VoronoiDiagram(graphMonaco);
+	//
+	// voronoiPreprocessingSW.start();
+	// voronoiDiagram.createDiagram();
+	// voronoiPreprocessingSW.stop();
+	// graphMonaco.reverseGraph();
+	//
+	// // for (int i = 0; i < graphMonaco.getNumberOfNodes(); i++) {
+	// //
+	// // StdDraw.point(graphMonaco.getNode(i).getLatitude(),
+	// // graphMonaco.getNode(i).getLongitude());
+	// //
+	// // }
+	// //
+	// // StdDraw.setPenRadius(0.001);
+	// //
+	// // for (int i = 0; i < graphMonaco.getNumberOfEdges(); i++) {
+	// //
+	// // Node fromNode =
+	// // graphMonaco.getNode(graphMonaco.getEdge(i).getFromNode());
+	// // Node toNode =
+	// // graphMonaco.getNode(graphMonaco.getEdge(i).getToNode());
+	// //
+	// // StdDraw.line(fromNode.getLatitude(), fromNode.getLongitude(),
+	// // toNode.getLatitude(), toNode.getLongitude());
+	// //
+	// // }
+	//
+	// logger.info("Preprocessing time for the Voronoi Diagram: {}ns",
+	// voronoiPreprocessingSW.getNanos());
+	//
+	// KNNVoronoi knn = new KNNVoronoi(graphMonaco, voronoiDiagram);
+	//
+	// voronoiExecutionSW.start();
+	// Queue<DistanceEntry> finalResult = knn.executeKNN(source, k);
+	// voronoiExecutionSW.stop();
+	//
+	// logger.info("Execution time for the Voronoi Diagram: {}ns",
+	// voronoiExecutionSW.getNanos());
+	// System.out.println(voronoiExecutionSW.getNanos());
+	// int size = finalResult.size();
+	//
+	// for (int i = 1; i <= size; i++) {
+	// DistanceEntry poi = finalResult.poll();
+	// logger.info("k = {}", i);
+	// logger.info("\tPoI: {}, Distance = {}", poi.getId(), poi.getDistance());
+	// }
+	//
+	// }
+
 	@Test
-	public void runVoronoiMonacoTest() {
-
-		// StdDraw.setCanvasSize(1280,720);
-		// StdDraw.setXscale(43.720209, 43.755420);
-		// StdDraw.setYscale(7.403727, 7.446110);
-		//
-		// StdDraw.setPenColor(StdDraw.BLACK);
-		//
-		// StdDraw.setPenRadius(0.005);
-
+	public void experimentMonaco() {
+		List<Integer> numberOfNeighbors = new ArrayList<>(Arrays.asList(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 777));
+		int numberOfRepetitions = 100;
+		Graph testGraph = graphMonaco;
 		StopWatch voronoiPreprocessingSW = new StopWatch();
-		StopWatch voronoiExecutionSW = new StopWatch();
-		Long source = graphMonaco.getNodeId(43.72842465479131, 7.414896579419745);
-		int k = 128;
+		// StopWatch voronoiExecutionSW = new StopWatch();
+		Long source = 0l;
 
-		graphMonaco.reverseGraph();
+		testGraph.reverseGraph();
 
-		VoronoiDiagram voronoiDiagram = new VoronoiDiagram(graphMonaco);
+		VoronoiDiagram voronoiDiagram = new VoronoiDiagram(testGraph);
 
 		voronoiPreprocessingSW.start();
 		voronoiDiagram.createDiagram();
 		voronoiPreprocessingSW.stop();
-		graphMonaco.reverseGraph();
 
-		// for (int i = 0; i < graphMonaco.getNumberOfNodes(); i++) {
-		//
-		// StdDraw.point(graphMonaco.getNode(i).getLatitude(),
-		// graphMonaco.getNode(i).getLongitude());
-		//
-		// }
-		//
-		// StdDraw.setPenRadius(0.001);
-		//
-		// for (int i = 0; i < graphMonaco.getNumberOfEdges(); i++) {
-		//
-		// Node fromNode =
-		// graphMonaco.getNode(graphMonaco.getEdge(i).getFromNode());
-		// Node toNode =
-		// graphMonaco.getNode(graphMonaco.getEdge(i).getToNode());
-		//
-		// StdDraw.line(fromNode.getLatitude(), fromNode.getLongitude(),
-		// toNode.getLatitude(), toNode.getLongitude());
-		//
-		// }
+		testGraph.reverseGraph();
 
 		logger.info("Preprocessing time for the Voronoi Diagram: {}ns", voronoiPreprocessingSW.getNanos());
 
-		KNNVoronoi knn = new KNNVoronoi(graphMonaco, voronoiDiagram);
+		for (Integer k : numberOfNeighbors) {
+			System.out.println("Starting to run the Voronoi-based approach for k = " + k);
+			double averageExecutionTime = 0;
 
-		voronoiExecutionSW.start();
-		Queue<DistanceEntry> finalResult = knn.executeKNN(source, k);
-		voronoiExecutionSW.stop();
+			for (int i = 0; i < numberOfRepetitions; i++) {
+				StopWatch voronoiExecutionSW = new StopWatch();
+				KNNVoronoi knn = new KNNVoronoi(testGraph, voronoiDiagram);
+				voronoiExecutionSW.start();
+				knn.executeKNN(source, k);
+				voronoiExecutionSW.stop();
 
-		logger.info("Execution time for the Voronoi Diagram: {}ns", voronoiExecutionSW.getNanos());
-		System.out.println(voronoiExecutionSW.getNanos());
-		int size = finalResult.size();
+				averageExecutionTime += voronoiExecutionSW.getSeconds();
+			}
 
-		for (int i = 1; i <= size; i++) {
-			DistanceEntry poi = finalResult.poll();
-			logger.info("k = {}", i);
-			logger.info("\tPoI: {}, Distance = {}", poi.getId(), poi.getDistance());
+			averageExecutionTime = averageExecutionTime / numberOfRepetitions;
+			System.out.println("averageExecutionTime = " + averageExecutionTime);
+
 		}
 
 	}
 
 	// @Test
-	// public void experimentMonaco() {
-	// List<Integer> numberOfNeighbors = new ArrayList<>(Arrays.asList(1, 2, 4,
-	// 8, 16, 32, 64, 128, 256, 512, 777));
-	// int numberOfRepetitions = 10;
-	// Graph testGraph = graphMonaco;
-	// StopWatch voronoiPreprocessingSW = new StopWatch();
-	// // StopWatch voronoiExecutionSW = new StopWatch();
-	// Long source = 0l;
+	// public void shortestPathTest() {
 	//
-	// testGraph.reverseGraph();
+	// Long source = 552l;
+	// Long destination = 447l;
 	//
-	// VoronoiDiagram voronoiDiagram = new VoronoiDiagram(testGraph);
-	//
-	// voronoiPreprocessingSW.start();
-	// voronoiDiagram.createDiagram();
-	// voronoiPreprocessingSW.stop();
-	//
-	// testGraph.reverseGraph();
-	//
-	// logger.info("Preprocessing time for the Voronoi Diagram: {}ns",
-	// voronoiPreprocessingSW.getNanos());
-	//
-	// for (Integer k : numberOfNeighbors) {
-	// System.out.println("Starting to run the Voronoi-based approach for k = "
-	// + k);
-	// double averageExecutionTime = 0;
-	//
-	// for (int i = 0; i < numberOfRepetitions; i++) {
-	// StopWatch voronoiExecutionSW = new StopWatch();
-	// KNNVoronoi knn = new KNNVoronoi(testGraph, voronoiDiagram);
-	// voronoiExecutionSW.start();
-	// knn.executeKNN(source, k);
-	// voronoiExecutionSW.stop();
-	//
-	// averageExecutionTime += voronoiExecutionSW.getSeconds();
-	// }
-	//
-	// averageExecutionTime = averageExecutionTime / numberOfRepetitions;
-	// System.out.println("averageExecutionTime = " + averageExecutionTime);
+	// Dijkstra dj = new DijkstraConstantWeight(graphMonaco);
+	// System.out.println(dj.shortestPath(graphMonaco.getNode(source),
+	// graphMonaco.getNode(destination)).getTotalDistance());
 	//
 	// }
-	//
-	// }
-
-//	@Test
-//	public void shortestPathTest() {
-//
-//		Long source = 552l;
-//		Long destination = 447l;
-//
-//		Dijkstra dj = new DijkstraConstantWeight(graphMonaco);
-//		System.out.println(dj.shortestPath(graphMonaco.getNode(source), graphMonaco.getNode(destination)).getTotalDistance());
-//
-//	}
 
 }

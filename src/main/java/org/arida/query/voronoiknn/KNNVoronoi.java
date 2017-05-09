@@ -46,11 +46,11 @@ public class KNNVoronoi {
 	 */
 	public Queue<DistanceEntry> executeKNN(long queryPoint, int k) {
 
-		StdDraw.setCanvasSize(1280,720);
-		StdDraw.setXscale(43.720209, 43.755420);
-		StdDraw.setYscale(7.403727, 7.446110);
-		StdDraw.setPenColor(StdDraw.BLACK);
-		StdDraw.setPenRadius(0.005);
+//		StdDraw.setCanvasSize(1280,720);
+//		StdDraw.setXscale(43.720209, 43.755420);
+//		StdDraw.setYscale(7.403727, 7.446110);
+//		StdDraw.setPenColor(StdDraw.BLACK);
+//		StdDraw.setPenRadius(0.005);
 		
 		
 		
@@ -97,41 +97,43 @@ public class KNNVoronoi {
 				newNodes.add(nearestNeighborCandidatePoI);
 				updateAuxiliarGraphWithNewBorderPoints(newNodes);
 				
-				StdDraw.setPenRadius(0.005);
-				StdDraw.setPenColor(StdDraw.BLACK);
-				for (int j = 0; j < borderPointsGraph.getNumberOfNodes(); j++) {
-					StdDraw.point(borderPointsGraph.getNode(j).getLatitude(), borderPointsGraph.getNode(j).getLongitude());
-				}
-				StdDraw.setPenRadius(0.001);
+//				StdDraw.setPenRadius(0.005);
+//				StdDraw.setPenColor(StdDraw.BLACK);
+//				for (int j = 0; j < borderPointsGraph.getNumberOfNodes(); j++) {
+//					StdDraw.point(borderPointsGraph.getNode(j).getLatitude(), borderPointsGraph.getNode(j).getLongitude());
+//				}
+//				StdDraw.setPenRadius(0.001);
 				for (int j = 0; j < borderPointsGraph.getNumberOfEdges(); j++) {
 					Node fromNode = borderPointsGraph.getNode(borderPointsGraph.getEdge(j).getFromNode());
+//					System.out.println(fromNode.getId());
 					Node toNode = borderPointsGraph.getNode(borderPointsGraph.getEdge(j).getToNode());
-					StdDraw.line(fromNode.getLatitude(), fromNode.getLongitude(), toNode.getLatitude(), toNode.getLongitude());
+//					System.out.println(toNode.getId());
+//					StdDraw.line(fromNode.getLatitude(), fromNode.getLongitude(), toNode.getLatitude(), toNode.getLongitude());
 				}
 				
 				
-				StdDraw.setPenRadius(0.01);
+//				StdDraw.setPenRadius(0.01);
 				Dijkstra dj = new DijkstraConstantWeight(borderPointsGraph);
 				long from = borderPointsGraph.getNodeId(graph.getNode(queryPoint).getLatitude(),
 						graph.getNode(queryPoint).getLongitude());
-				StdDraw.setPenColor(StdDraw.BLUE);
-				StdDraw.point(graph.getNode(queryPoint).getLatitude(),
-						graph.getNode(queryPoint).getLongitude());
+//				StdDraw.setPenColor(StdDraw.BLUE);
+//				StdDraw.point(graph.getNode(queryPoint).getLatitude(),
+//						graph.getNode(queryPoint).getLongitude());
 				long to = borderPointsGraph.getNodeId(graph.getNode(nearestNeighborCandidatePoI).getLatitude(),
 						graph.getNode(nearestNeighborCandidatePoI).getLongitude());
-				StdDraw.setPenColor(StdDraw.RED);
-				StdDraw.point(graph.getNode(nearestNeighborCandidatePoI).getLatitude(),
-						graph.getNode(nearestNeighborCandidatePoI).getLongitude());
+//				StdDraw.setPenColor(StdDraw.RED);
+//				StdDraw.point(graph.getNode(nearestNeighborCandidatePoI).getLatitude(),
+//						graph.getNode(nearestNeighborCandidatePoI).getLongitude());
 				
-				long distance;
+				int distance;
 				
 				try {
-					distance = dj.shortestPath(from, to).getTotalDistance();
+					distance = (int) dj.shortestPath(from, to).getTotalDistance();
 				} catch (Exception e) {
-					distance = Long.MAX_VALUE;
+					distance = Integer.MAX_VALUE;
 				}
 
-				nearestNeighbors.add(new DistanceEntry(nearestNeighborCandidatePoI, (int) distance, -1));
+				nearestNeighbors.add(new DistanceEntry(nearestNeighborCandidatePoI, distance, -1));
 			}
 
 			
