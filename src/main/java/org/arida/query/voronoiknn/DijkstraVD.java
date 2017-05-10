@@ -235,7 +235,7 @@ public class DijkstraVD {
 						if (newBorderNeighbors == null) {
 							newBorderNeighbors = new HashSet<>();
 							newBorderNeighbors.add(borderEdgeBackwardDistanceEntry);
-							borderNeighbor.put(removed.getId(), newBorderNeighbors);
+							borderNeighbor.put(vid, newBorderNeighbors);
 						} else {
 							newBorderNeighbors.add(borderEdgeBackwardDistanceEntry);
 							borderNeighbor.replace(vid, newBorderNeighbors);

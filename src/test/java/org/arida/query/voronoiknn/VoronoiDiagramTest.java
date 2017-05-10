@@ -38,6 +38,7 @@ public class VoronoiDiagramTest {
 		logger.info("Finishing PoI's generation.");
 
 		graphHopperExample4 = new GraphGenerator().generateGraphHopperExample4();
+		POIImporter.generateRandomPoIs(graphHopperExample4, 100);
 	}
 
 	// @Test
@@ -76,44 +77,38 @@ public class VoronoiDiagramTest {
 	//
 	// }
 
-	// @Test
-	// public void runVoronoiMonacoTest() {
-	//
-	// StopWatch voronoiPreprocessingSW = new StopWatch();
-	// StopWatch voronoiExecutionSW = new StopWatch();
-	// long source = 0;
-	// int k = 4;
-	//
-	// // graphHopperExample4.reverseGraph();
-	//
-	// VoronoiDiagram voronoiDiagram = new VoronoiDiagram(graphHopperExample4);
-	//
-	// voronoiPreprocessingSW.start();
-	// voronoiDiagram.createDiagram();
-	// voronoiPreprocessingSW.stop();
-	// // graphHopperExample4.reverseGraph();
-	//
-	// logger.info("Preprocessing time for the Voronoi Diagram: {}ns",
-	// voronoiPreprocessingSW.getNanos());
-	//
-	// KNNVoronoi knn = new KNNVoronoi(graphHopperExample4, voronoiDiagram);
-	//
-	// voronoiExecutionSW.start();
-	// Queue<DistanceEntry> finalResult = knn.executeKNN(source, k);
-	// voronoiExecutionSW.stop();
-	//
-	// logger.info("Execution time for the Voronoi Diagram: {}ns",
-	// voronoiExecutionSW.getNanos());
-	// System.out.println(voronoiExecutionSW.getNanos());
-	// int size = finalResult.size();
-	//
-	// for (int i = 1; i <= size; i++) {
-	// DistanceEntry poi = finalResult.poll();
-	// logger.info("k = {}", i);
-	// logger.info("\tPoI: {}, Distance = {}", poi.getId(), poi.getDistance());
-	// }
-	//
-	// }
+//	@Test
+//	public void runGraphHopperExample4Test() {
+//
+//		Graph testGraph = graphHopperExample4;
+//		long source = 0;
+//		int k = 34;
+//
+//		testGraph.reverseGraph();
+//		VoronoiDiagram voronoiDiagram = new VoronoiDiagram(testGraph);
+//		voronoiDiagram.createDiagram();
+//		testGraph.reverseGraph();
+//
+//		KNNVoronoi knn = new KNNVoronoi(testGraph, voronoiDiagram);
+//
+//		Queue<DistanceEntry> finalResult = knn.executeKNN(source, k);
+//
+//		int size = finalResult.size();
+//
+//		for (int i = 1; i <= size; i++) {
+//			DistanceEntry poi = finalResult.poll();
+//			logger.info("k = {}", i);
+//			logger.info("\tPoI: {}, Distance = {}", poi.getId(), poi.getDistance());
+//
+//			Long destination = poi.getId();
+//
+//			Dijkstra dj = new DijkstraConstantWeight(testGraph);
+//
+//			assertEquals(dj.shortestPath(testGraph.getNode(source), testGraph.getNode(destination)).getTotalDistance(),
+//					poi.getDistance());
+//		}
+//
+//	}
 
 	// @Test
 	// public void runVoronoiMonacoTest() {
@@ -230,11 +225,12 @@ public class VoronoiDiagramTest {
 	// public void shortestPathTest() {
 	//
 	// Long source = 552l;
-	// Long destination = 447l;
+	// Long destination = 726l;
 	//
 	// Dijkstra dj = new DijkstraConstantWeight(graphMonaco);
-	// System.out.println(dj.shortestPath(graphMonaco.getNode(source),
-	// graphMonaco.getNode(destination)).getTotalDistance());
+	// System.out
+	// .println(dj.shortestPath(graphMonaco.getNode(source),
+	// graphMonaco.getNode(destination)).getTotalCost());
 	//
 	// }
 
