@@ -151,11 +151,9 @@ public class DijkstraVD {
 
 						wasTraversed.put(newEntry.getId(), newEntry.getDistance());
 
-						// TODO Double check if this is working
-						newEntry.setId(source.getId());
-						newEntry.setParent(vid);
-						newEntry.setDistance(distance);
-						globalUnsettleNodes.remove(newEntry);
+						DistanceEntry auxiliarEntry = new DistanceEntry(source.getId(), distance, vid);
+
+						globalUnsettleNodes.remove(auxiliarEntry);
 						globalUnsettleNodes.add(new DistanceEntry(source.getId(), distance, vid));
 
 						parents.remove(vid);
@@ -294,10 +292,9 @@ public class DijkstraVD {
 						wasTraversed.put(newEntry.getId(), newEntry.getDistance());
 
 						// TODO Double check if this is working
-						newEntry.setId(source.getId());
-						newEntry.setParent(vid);
-						newEntry.setDistance(distance);
-						globalUnsettleNodes.remove(newEntry);
+						DistanceEntry auxiliarEntry = new DistanceEntry(source.getId(), distance, vid);
+						
+						globalUnsettleNodes.remove(auxiliarEntry);
 						globalUnsettleNodes.add(new DistanceEntry(source.getId(), distance, vid));
 
 						parents.remove(vid);

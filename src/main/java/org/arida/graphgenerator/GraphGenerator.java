@@ -3,7 +3,6 @@ package org.arida.graphgenerator;
 import org.graphast.config.Configuration;
 import org.graphast.importer.CostGenerator;
 import org.graphast.importer.OSMImporterImpl;
-import org.graphast.importer.POIImporter;
 import org.graphast.model.Edge;
 import org.graphast.model.EdgeImpl;
 import org.graphast.model.Graph;

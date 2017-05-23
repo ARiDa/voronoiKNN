@@ -139,9 +139,27 @@ public class VoronoiDiagram {
 
 		}
 
+//		for(long i=0; i<g.getNumberOfNodes(); i++) {
+//			System.out.println(i);
+//			
+//			if(node2PoiDistance.get(i) == null) {
+//				continue;
+//			}
+//			
+//			
+//			for(long localId : node2PoiDistance.get(i).keySet()) {
+//				int distance = node2PoiDistance.get(i).get(localId);
+//				Dijkstra dj = new DijkstraConstantWeight(g);
+//				if(dj.shortestPath(g.getNode(localId), g.getNode(i)).getTotalCost() != distance) {
+//					System.out.println("ERRADO");
+//				}
+//				
+//			}
+//			
+//		}
+		
 		discoverBorderPoints();
 		calculateBorderDistances();
-
 	}
 
 	// TODO This method should be changed to use R-tree
@@ -190,7 +208,7 @@ public class VoronoiDiagram {
 	}
 
 	private void calculateBorderDistances() {
-
+		g.reverseGraph();
 		long distance;
 
 		for (Map.Entry<Long, HashSet<Long>> entry : polygonBorderPoints.entrySet()) {
@@ -236,6 +254,7 @@ public class VoronoiDiagram {
 				}
 			}
 		}
+		g.reverseGraph();
 	}
 
 	private long calculatePoI2BorderDistances(Long poi, Long borderPoint) {

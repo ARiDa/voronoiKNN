@@ -17,8 +17,6 @@ import org.graphast.model.NodeImpl;
 import org.graphast.query.route.shortestpath.dijkstra.Dijkstra;
 import org.graphast.query.route.shortestpath.dijkstra.DijkstraConstantWeight;
 import org.graphast.query.route.shortestpath.model.DistanceEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class KNNVoronoi {
 
@@ -31,8 +29,6 @@ public class KNNVoronoi {
 	Queue<DistanceEntry> finalNearestNeighbors = new PriorityQueue<>();
 	Queue<DistanceEntry> candidatePoIs = new PriorityQueue<>();
 	long queryPoint = 0l;
-
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public KNNVoronoi(Graph graph, VoronoiDiagram voronoiDiagram) {
 		this.graph = graph;
@@ -75,9 +71,11 @@ public class KNNVoronoi {
 		// The first iteration will consider all the borderPoints AND the query
 		// point.
 		Set<Long> newNodes = voronoiDiagram.getPolygonBorderPoints().get(firstNearestNeighbor);
-		newNodes.add(queryPoint);
+		newNodes.add(firstNearestNeighbor);
+//		newNodes.add(queryPoint);
 
 		updateAuxiliarGraphWithNewBorderPoints(newNodes);
+		updateAuxiliarGraphWithQueryPoint(queryPoint, firstNearestNeighbor);
 
 		nextNeighborCandidates = voronoiDiagram.getAdjacentPolygons().get(firstNearestNeighbor);
 		visitedNeighborsCandidates.add(firstNearestNeighbor);
@@ -137,6 +135,42 @@ public class KNNVoronoi {
 		return finalResult;
 
 	}
+	
+	private void updateAuxiliarGraphWithQueryPoint(long queryPoint, long firstNearestNeighbor) {
+		
+		Node fromNode;
+		Long fromNodeId = borderPointsGraph.getNodeId(graph.getNode(queryPoint).getLatitude(),
+				graph.getNode(queryPoint).getLongitude());
+
+		// Checking if the node already exists
+		if (fromNodeId == null) {
+			fromNode = new NodeImpl(queryPoint, graph.getNode(queryPoint).getLatitude(),
+					graph.getNode(queryPoint).getLongitude());
+			borderPointsGraph.addNode(fromNode);
+		} else {
+			fromNode = borderPointsGraph.getNode(fromNodeId);
+		}
+		
+		
+		for(Long borderPointTo : voronoiDiagram.getPolygonBorderPoints().get(firstNearestNeighbor)) {
+			
+			Edge newEdge;
+			//TODO Change this.
+			Long destination = borderPointsGraph.getNodeId(graph.getNode(borderPointTo).getLatitude(),
+					graph.getNode(borderPointTo).getLongitude());
+			Dijkstra dj = new DijkstraConstantWeight(graph);
+			
+			
+			
+			newEdge = new EdgeImpl(fromNode.getId(), destination, 
+					(int) dj.shortestPath(graph.getNode(queryPoint), graph.getNode(borderPointTo)).getTotalCost());
+				
+
+			borderPointsGraph.addEdge(newEdge);
+			
+		}
+		
+	}
 
 	/**
 	 * This method will receive a set of border points and will add them to an
@@ -190,8 +224,9 @@ public class KNNVoronoi {
 				if (voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null
 						|| voronoiDiagram.getBorder2BorderDistance().get(borderPointFrom) == null) {
 					if (voronoiDiagram.getBorder2BorderDistance().get(borderPointTo) == null) {
-						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2NodeDistance()
-								.get(borderPointFrom).get(borderPointTo).intValue());
+						Dijkstra dj = new DijkstraConstantWeight(graph);
+						
+						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), (int) dj.shortestPath(fromNode.getExternalId(), toNode.getExternalId()).getTotalDistance());
 					} else {
 						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram.getBorder2NodeDistance()
 								.get(borderPointTo).get(borderPointFrom).intValue());
@@ -202,7 +237,7 @@ public class KNNVoronoi {
 						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), Integer.MAX_VALUE);
 					} else {
 						newEdge = new EdgeImpl(fromNode.getId(), toNode.getId(), voronoiDiagram
-								.getBorder2BorderDistance().get(borderPointTo).get(borderPointFrom).intValue());
+								.getBorder2BorderDistance().get(borderPointFrom).get(borderPointTo).intValue());
 					}
 
 				}
