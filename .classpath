@@ -33,6 +33,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/graphast-core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/graphhopper"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/graphhopper-core"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
