@@ -1,11 +1,8 @@
 package org.arida.query.voronoiknn;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Queue;
 
 import org.arida.graphgenerator.GraphGenerator;
-import org.graphast.importer.POIImporter;
 import org.graphast.model.Graph;
 import org.graphast.model.Node;
 import org.graphast.query.route.shortestpath.dijkstra.Dijkstra;
@@ -15,8 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.graphhopper.util.StopWatch;
 
 public class VoronoiDiagramTest {
 
